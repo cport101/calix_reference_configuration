@@ -6,8 +6,8 @@ __author__ = "Charles F. Port"
 __copyright__ = "Copyright 04APR22"
 __credits__ = ["Charles F. Port"]
 __license__ = "GPL"
-__version__ = "0.0.2"
-__modified__ = 12APR22
+__version__ = "0.0.0"
+__modified__ = 04MAY22
 __maintainer__ = "TBD"
 __email__ = "charles.port@calix.com"
 __status__ = "Test"
@@ -38,7 +38,7 @@ END OF TERMS AND CONDITIONS
 Changes:
 ========
 
-12APR22:
+04MAY22:
 --------
 1. General cleanup after lint run.
 2. Changed function order.
