@@ -6,4 +6,5 @@ AXOS configuration stanzas. Follows our publicly published AXOS v21.x "reference
 remain to complete, and I think it might be interesting to create a menu to print and write out the yaml/jinja2 files to allow you to edit your
 own. UNIX focused - 
 [I use Ubuntu and FreeBSD in my work environment], and currently, option 29 will write all the yaml and jinja2 snipets to a set of /tmp/ files, and 
-then gen, print and write the full reference configuration. I will get around to making a setup.py to help with the Libs used. 
+then gen, print and write the full reference configuration. I will get around to making a setup.py to help with the Libs used. Includes login 
+(commented out) to push/send (via netmiko ssh) you generated configuration file. 
