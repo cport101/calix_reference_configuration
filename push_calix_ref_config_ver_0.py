@@ -2124,7 +2124,6 @@ Select operation:
 [20] Print the policy-map reference configuration
 [21] Print the dhcp and multibind interface reference configuration
 [29] Print the entire reference configuration
-[30] Display list
 
 ''')
 
@@ -2276,10 +2275,7 @@ Select operation:
             f2.write(gen_full_cfg )
             f2.close()
         print(gen_full_cfg)
-
-
-    elif operation == '30':
-        print(mylist)
+        
 
     else:
         print(
