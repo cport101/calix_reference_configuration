@@ -1,0 +1,615 @@
+
+ipv4_static_hosts:
+  host_1:
+    - { ipv4_addr: "172.23.43.251", name_fqdn: "petnis01.calix.local" }
+  host_2:
+    - { ipv4_addr: "10.200.0.204" , name_fqdn: "sjclnx-st01.calix.local" }
+  host_3:
+    - { ipv4_addr: "10.136.10.34" , name_fqdn: "slc-scratch.caal.dev" }
+ipv4_ntp_servers:
+  ntp1:
+    - { ntp_srv_no: "1", ipv4_addr: ,
+        ntp_fqdn: "petnis01.calix.local" }
+  ntp2:
+    - { ntp_srv_no: "2", ipv4_addr: ,
+        ntp_fqdn: "sjclnx-st01.calix.local", source_int: "system-craft" }
+aaa:
+    # tacacs-if-up-else-local Authenticate via tacacs [only] if up, else local
+    # tacacs-then-local       Authenticate using tacacs then local database
+    auth_order: 'tacacs-then-local'
+    source_interface: 'system-craft'
+    tac_srv_ipaddr: '10.200.0.212'
+    tacacs_secret: '$1001$U2FsdGVkX1+jB4mHhWV3OLaDrEFbkm3smdVAG/kTC3Z1OQ=='
+    # FIXED AAA ROLES:
+    # admin  calixsupport  networkadmin  oper  ro
+    user:
+        - ['calixsupport','$1$qdmQFTMT$aaOZdqIzWwQsfSU5pc4XT0','calixsupport']
+        - ['monitor','$1$bo6RaxHE$prYA2waVd/o4atvb1H8l8/','oper']
+        - ['networkadmin','$1$henWME92$LqNxDU3.wWG19Fz.AlL5H0','networkadmin']
+        - ['support','$1$s4LUL/4m$aQjOzqPRi/CUHpaYTGLGz/','oper']
+        - ['sysadmin','$1$.fwnoBuy$fmIOhTEfd3RGyOSiwaQA40','admin']
+ont_upg_srv:
+    ous:
+    - { source_int: "system-craft", ipaddr: "10.136.10.34",
+        username: "cafetest", passwd: '$1001$U2FsdGVkX1/K59XU+GRgqOOPgVk5Jfp0',
+        port: 21 }
+
+
+ip_prefix_list: 
+  netconf-access:
+    - { seq_no: 10,  seq_match: "172.23.34.0/24" }
+  copp-acl-e9host:
+    - { seq_no: 10,   seq_match: "15.10.10.0/24" }
+    - { seq_no: 20,   seq_match: "15.10.11.0/24" }
+    - { seq_no: 30,   seq_match: "15.10.12.0/24" }
+    - { seq_no: 40,   seq_match: "15.10.13.0/24" }
+    - { seq_no: 50,   seq_match: "15.10.14.0/24" }
+    - { seq_no: 60,   seq_match: "15.10.15.0/24" }
+    - { seq_no: 70,   seq_match: "15.10.16.0/24" }
+    - { seq_no: 80,   seq_match: "15.10.17.0/24" }
+    - { seq_no: 90,   seq_match: "15.10.18.0/24" }
+    - { seq_no: 100,  seq_match: "15.10.19.0/24" }
+    - { seq_no: 110,  seq_match: "15.10.20.0/24" }
+    - { seq_no: 120,  seq_match: "15.10.21.0/24" }
+    - { seq_no: 130,  seq_match: "15.10.22.0/24" }
+    - { seq_no: 140,  seq_match: "15.10.23.0/24" }
+    - { seq_no: 150,  seq_match: "15.10.24.0/24" }
+    - { seq_no: 160,  seq_match: "15.10.25.0/24" }
+    - { seq_no: 170,  seq_match: "15.10.26.0/24" }
+    - { seq_no: 180,  seq_match: "15.10.27.0/24" }
+    - { seq_no: 190,  seq_match: "15.10.28.0/24" }
+    - { seq_no: 200,  seq_match: "15.10.29.0/24" }
+    - { seq_no: 210,  seq_match: "15.10.30.0/24" }
+    - { seq_no: 220,  seq_match: "15.10.31.0/24" }
+    - { seq_no: 230,  seq_match: "15.10.32.0/24" }
+    - { seq_no: 240,  seq_match: "15.10.33.0/24" }
+    - { seq_no: 250,  seq_match: "15.10.34.0/24" }
+    - { seq_no: 260,  seq_match: "15.10.35.0/24" }
+    - { seq_no: 270,  seq_match: "15.10.36.0/24" }
+    - { seq_no: 280,  seq_match: "15.10.37.0/24" }
+    - { seq_no: 290,  seq_match: "140.1.1.1/32" }
+    - { seq_no: 300,  seq_match: "15.0.0.1/32" }
+    - { seq_no: 310,  seq_match: "15.0.0.0/24" }
+  local_interfaces:
+    - { seq_no: 10,   seq_match: "10.28.123.129/32" }
+    - { seq_no: 20,   seq_match: "15.0.0.1/32" }
+    - { seq_no: 30,   seq_match: "10.28.120.129/32" }
+    - { seq_no: 50,   seq_match: "107.150.15.1/32" }
+    - { seq_no: 55,   seq_match: "107.150.16.1/32" }
+    - { seq_no: 60,   seq_match: "107.150.128.1/32" }
+    - { seq_no: 65,   seq_match: "107.150.144.1/32" }
+    - { seq_no: 70,   seq_match: "107.150.64.1/32" }
+    - { seq_no: 75,   seq_match: "107.150.0.1/32" }
+    - { seq_no: 80,   seq_match: "107.150.4.1/32" }
+    - { seq_no: 85,   seq_match: "10.29.84.1/32" }
+    - { seq_no: 90,   seq_match: "10.29.86.1/32" }
+    - { seq_no: 95,   seq_match: "10.29.85.1/32" }
+    - { seq_no: 100,  seq_match: "192.168.7.1/32" }
+    - { seq_no: 105,  seq_match: "10.28.120.129/32" }
+  ssh_config_servers_oob:
+    - { seq_no: 10,  seq_match: "10.201.32.0/22" }
+  vod_server:
+    - { seq_no: 10,  seq_match: "10.20.0.0/16" }
+  voip_subscriber_network:
+    - { seq_no: 10,  seq_match: "10.28.123.128/25" }
+  in-data:
+    - { seq_no: 5,  seq_match: "0.0.0.0/0" }
+  in-video:
+    - { seq_no: 5,  seq_match: "0.0.0.0/0" }
+  in-voice:
+    - { seq_no: 5,  seq_match: "0.0.0.0/0" }
+  out-data:
+    - { seq_no: 5,  seq_match: "107.150.16.0/20 ge 20 le 20" }
+    - { seq_no: 10, seq_match: "107.150.128.0/20 ge 20 le 20" }
+  out-video:
+    - { seq_no: 5,  seq_match: "49.49.49.0/24" }
+  out-voice:
+    - { seq_no: 5,  seq_match: "59.59.59.0/24" }
+    - { seq_no: 10,  seq_match: "10.128.128.0/29 ge 29 le 29" }
+
+
+acl_list:
+  craft_interface_control_ipv4:
+    - { ipv4: "yes", description: }
+    - { rule_no: 30, rule_desc: "dst-traceroute", rule_match_proto: "udp",
+        rule_match_specs: "destination-port-range 33434-33523", rule_action: "permit",
+        rule_cpu_cosq: "", rule_count: "count" }
+    - { rule_no: 60, rule_desc: '"allow-src-sp_ssh 01"', rule_match_src_prefix: "ssh_config_servers_oob",
+        rule_match_specs: "destination-port-range ssh", rule_match_proto: "tcp",
+        rule_action: "permit", rule_cpu_cosq: " ", rule_count: "count" }
+    - { rule_no: 70, rule_desc: "allow-src-sp_netconf", rule_match_src_prefix: "netconf-access",
+        rule_match_specs: "destination-port-range 830", rule_match_proto: "tcp",
+        rule_action: "permit", rule_cpu_cosq: " ", rule_count: "count" }
+    - { rule_no: 255, rule_desc: "deny-all", rule_match_any: "any", rule_action: "deny", rule_count: "count" }
+  control_plane_access_list_ipv4:
+    - { ipv4: "yes", description: "control plane filter ipv4" }
+    - { rule_no: 10, rule_desc: "limit-10m-dst-dhcp", rule_match_proto: "UDP",
+        rule_match_specs: "source-port-range 68 destination-port-range 67-68",
+        rule_action: "permit", rule_cpu_cosq: "cpu-cosq 28",
+        rule_count: "count" }
+    - { rule_no: 22, rule_match_misc: "source-ipv4-network 107.150.0.2/32 protocol TCP destination-port-range 179",
+        rule_action: "permit", rule_cpu_cosq: "cpu-cosq 42", rule_count: "count" }
+    - { rule_no: 23, rule_match_misc: "source-ipv4-network 107.150.0.1/32 protocol TCP source-port-range 179",
+        rule_action: "permit", rule_cpu_cosq: "cpu-cosq 43", rule_count: "count" }
+    - { rule_no: 29, rule_desc: "limit-srcdst-icmp-sp", rule_match_proto: "ICMP",
+        rule_action: "permit", rule_cpu_cosq: "cpu-cosq 2", rule_count: "count" }
+    - { rule_no: 30, rule_desc: "limit-1m-dst-traceroute", rule_match_proto: "UDP",
+        rule_match_specs: "destination-port-range 33434-33523", rule_action: "permit",
+        rule_cpu_cosq: "cpu-cosq 3", rule_count: "count" }
+    - { rule_no: 38, rule_desc: "access_to_voice_server", rule_match_dest_prefix: "out-voice",
+        rule_action: "permit", rule_cpu_cosq: "cpu-cosq 44", rule_count: "count" }
+    - { rule_no: 40, rule_desc: "access_to_VOD_server", rule_match_dest_prefix: "vod_server",
+        rule_action: "permit", rule_cpu_cosq: " ", rule_count: "count" }
+    - { rule_no: 52, rule_match_misc: "source-port-range BOOTPC",
+        rule_action: "permit", rule_cpu_cosq: "cpu-cosq 6", rule_count: "count" }
+    - { rule_no: 61, rule_desc: '"E9 access"', rule_match_dest_prefix: "copp-acl-e9host",
+        rule_action: "permit", rule_cpu_cosq: " ", rule_count: "count" }
+    - { rule_no: 255, rule_desc: "deny-all", rule_match_any: "any", rule_action: "deny", rule_count: "count" }
+
+
+cos_profile:
+  cosq-control_plane:
+    - { cosq_entry: 1, max_bandwidth: 1000, }
+    - { cosq_entry: 2, max_bandwidth: 1000, }
+    - { cosq_entry: 3, max_bandwidth: 1000, }
+    - { cosq_entry: 4, max_bandwidth: 500,  }
+    - { cosq_entry: 5, max_bandwidth: 500,  }
+    - { cosq_entry: 6, max_bandwidth: 500,  }
+    - { cosq_entry: 7, max_bandwidth: 1000, }
+    - { cosq_entry: 10, max_bandwidth: 1000, }
+    - { cosq_entry: 11, max_bandwidth: 64, }
+    - { cosq_entry: 12, max_bandwidth: 64, queue_depth: 128000, }
+    - { cosq_entry: 13, }
+    - { cosq_entry: 14, }
+    - { cosq_entry: 15, }
+    - { cosq_entry: 16, }
+    - { cosq_entry: 25, max_bandwidth: 1000, }
+    - { cosq_entry: 26, max_bandwidth: 10000, }
+    - { cosq_entry: 27, }
+    - { cosq_entry: 28, max_bandwidth: 10000, }
+    - { cosq_entry: 30, }
+    - { cosq_entry: 31, max_bandwidth: 1000, }
+    - { cosq_entry: 32, max_bandwidth: 500, }
+    - { cosq_entry: 33, }
+    - { cosq_entry: 34, }
+    - { cosq_entry: 35, max_bandwidth: 500, }
+    - { cosq_entry: 36, max_bandwidth: 500, }
+    - { cosq_entry: 37, max_bandwidth: 128, }
+    - { cosq_entry: 40, }
+    - { cosq_entry: 41, max_bandwidth: 1000, }
+    - { cosq_entry: 42, max_bandwidth: 10000, }
+    - { cosq_entry: 43, max_bandwidth: 10000, }
+    - { cosq_entry: 44, max_bandwidth: 1000, }
+  pon-cos:
+    - { cosq_group_scheduling_type: "3SP-3WRR", cosq_entry: 1, }
+
+
+craft_info:
+  1/1/2:
+    - { desc: "craft interface 1/1/2", cosq: , dhcp_state: "disable", ipv4_acl: "craft_interface_control_ipv4", vrf_name: ,
+        ip_addr_v4_w_mask: "10.137.13.195/21", ip_addr_v6_w_mask: , shutdown_state: "no shutdown" }
+  1/2/2:
+    - { desc: "craft interface 1/2/2", cosq: , dhcp_state: "disable", ipv4_acl: "craft_interface_control_ipv4", vrf_name: ,
+        ip_addr_v4_w_mask: "10.137.13.196/21", ip_addr_v6_w_mask: , shutdown_state: "no shutdown" }
+sys_craft:
+  1:
+  - { desc: "System Craft for Triple_play",  dhcp_server_state: "disable", dhcp_fwd_vrf: , dhcp_fwd_vrf_ipv4: ,
+      ip_addr_v4_w_mask: "10.137.13.194/32", dhcp_fwd_vrf_ipv6: , sys_int_state: "no shutdown" }
+
+
+cntrl_plane:
+  - type: "cosq"
+    filter_name: "cosq-control_plane"
+  - type: "access-group"
+    proto_acl: "ipv4-acl"
+    filter_name: "control_plane_access_list_ipv4"
+# - type: "access-group"
+#   proto_acl: "ipv6-acl"
+#   filter_name: "control_plane_access_list_ipv6"
+
+
+redist:
+  redist1:
+    - { name: "out-data", name_no: 5, match_prefix: "out-data" }
+  redist2:
+    - { name: "out-video", name_no: 5, match_prefix: "out-video" }
+  redist3:
+    - { name: "out-voice", name_no: 5, match_prefix: "out-voice" }
+
+
+ip_vrf:
+  unicastvideo:
+  - { description: "Unicast Video VRF", ip_route_det: "0.0.0.0/0 next-hop NULL0 distance 255", router_bgp: "65501", redist_map: "out-video", rtr_id: "107.150.15.100",
+     graceful_restart_enable: "enable", graceful_restart_stalepath_time: 360, graceful_restart_path_selection_defer_time: , maximum_paths_ebgp: , bgp_policy_map: "in-video",
+     bgp_rule: 5, bgp_address_family: "ipv4-unicast", bgp_address_family_prefix_list: "in-video" }
+  - { bgp_neighbor_ipaddr: "107.150.4.2", bgp_neighbor_remote_as: 100, bgp_neighbor_weight: , soft_reconfiguration: ,
+      bgp_neighbor_update_source: , bgp_neighbor_bfd: , bgp_neighbor_passwd: , bgp_neighbor_policy_map_in: "in-video",
+      bgp_neighbor_policy_map_out: , bgp_neighbor_gnmi_group: }
+  - { bgp_neighbor_ipaddr: "107.150.4.0", bgp_neighbor_remote_as: 100, bgp_neighbor_weight: , soft_reconfiguration: ,
+      bgp_neighbor_update_source: , bgp_neighbor_bfd: , bgp_neighbor_passwd: , bgp_neighbor_policy_map_in: "in-video",
+      bgp_neighbor_policy_map_out: , bgp_neighbor_gnmi_group: }
+ # - { bgp_neighbor_ipaddr: "105.40.11.3", bgp_neighbor_remote_as: 101, bgp_neighbor_weight: 100, soft_reconfiguration: "soft-reconfiguration", bgp_neighbor_update_source: "105.40.11.2", bgp_neighbor_bfd: "BFDP-WAN-01",
+ #     bgp_neighbor_addr_family_details_ipv4_1: "ipv4 multicast", bgp_neighbor_addr_family_state_ipv4_1: "disable",
+ #     bgp_neighbor_addr_family_details_ipv4_2: "ipv4 unicast", bgp_neighbor_addr_family_state_ipv4_2: "enable",
+ #     bgp_neighbor_addr_family_details_ipv4_3: "ipv4 vpnv4", bgp_neighbor_addr_family_state_ipv4_3: "disable",
+ #     bgp_neighbor_addr_family_details_ipv6_1: "ipv6 multicast", bgp_neighbor_addr_family_state_ipv6_1: "disable",
+ #     bgp_neighbor_addr_family_details_ipv6_2: "ipv6 unicast", bgp_neighbor_addr_family_state_ipv6_2: "disable",
+ #     bgp_neighbor_addr_family_details_ipv6_3: "ipv6 vpnv4", bgp_neighbor_addr_family_state_ipv6_3: "disable",
+ #     bgp_neighbor_addr_family_details_misc: "l2vpn multicast",
+ #     bgp_neighbor_passwd: "test", bgp_neighbor_policy_map_in: "VOIP-IN", bgp_neighbor_policy_map_out: "VOIP-OUT",bgp_neighbor_gnmi_group: "pm-bgp-stat"  }
+  voice:
+  - { description: "Voice VRF", ip_route_det: "0.0.0.0/0 next-hop NULL0 distance 255" , router_bgp: "65501", redist_map: "out-voice", rtr_id: "107.150.15.10",
+      graceful_restart_enable: "enable", graceful_restart_stalepath_time: 360, graceful_restart_path_selection_defer_time:  ,maximum_paths_ebgp:  ,bgp_policy_map: "in-voice",
+      bgp_rule: 5, bgp_address_family: "ipv4-unicast", bgp_address_family_prefix_list: "in-voice" }
+  - { bgp_rule: 10, bgp_address_family: "ipv4-unicast", bgp_address_family_action: "deny" }
+  - { bgp_neighbor_ipaddr: "107.150.4.0", bgp_neighbor_remote_as: 100, bgp_neighbor_weight: , soft_reconfiguration: ,
+      bgp_neighbor_update_source: , bgp_neighbor_bfd: , bgp_neighbor_passwd: , bgp_neighbor_policy_map_in: "in-voice" }
+  - { bgp_neighbor_ipaddr: "107.150.4.2", bgp_neighbor_remote_as: 100, bgp_neighbor_weight: , soft_reconfiguration: ,
+      bgp_neighbor_update_source: , bgp_neighbor_bfd: , bgp_neighbor_passwd: , bgp_neighbor_policy_map_in: "in-voice" }
+
+
+
+int_lo:
+  1:
+    - { ip_addr_v4_w_mask: "107.150.15.1/32", ip_addr_v6_w_mask: , lo_state: "no shutdown" }
+  2:
+    - { ip_addr_v4_w_mask: "107.150.15.10/32", ip_vrf_fwd: "voice", ip_addr_v6_w_mask: , lo_state: "no shutdown" }
+  3:
+    - { ip_addr_v4_w_mask: "107.150.15.100/32", ip_vrf_fwd: "unicastvideo", ip_addr_v6_w_mask: , lo_state: "no shutdown" }
+
+
+router_bgp:
+  65501:
+    - { redist_map: "out-data", redist_map_static: , graceful_restart_enable: "enable", graceful_restart_stalepath_time: 360, graceful_restart_path_selection_defer_time: , maximum_paths_ebgp: 2 , rtr_id: "107.150.15.1" }
+    - { bgp_policy_map: "in-data" }
+    - { bgp_rule:  5,  bgp_addr_family: "ipv4-unicast", bgp_addr_prefix_list: "in-data", bgp_addr_comm_list_set: }
+    - { bgp_rule: 10, bgp_addr_family: "ipv4-unicast", bgp_addr_action: "deny" }
+    - { bgp_neighbor_ipaddr: "107.150.0.2", bgp_neighbor_remote_as: 100, bgp_neighbor_weight: , soft_reconfiguration: , bgp_neighbor_update_source: , bgp_neighbor_bfd: ,
+        bgp_neighbor_addr_family_details_ipv4_1: "ipv4 unicast", bgp_neighbor_addr_family_state_ipv4_1: "enable",
+        bgp_neighbor_addr_family_details_ipv4_2: "ipv4 multicast", bgp_neighbor_addr_family_state_ipv4_2: "enable",
+        bgp_neighbor_addr_family_details_ipv4_3: , bgp_neighbor_addr_family_state_ipv4_3: ,
+        bgp_neighbor_addr_family_details_ipv6_1: , bgp_neighbor_addr_family_state_ipv6_1: ,
+        bgp_neighbor_addr_family_details_ipv6_2: , bgp_neighbor_addr_family_state_ipv6_2: ,
+        bgp_neighbor_addr_family_details_ipv6_3: , bgp_neighbor_addr_family_state_ipv6_3: ,
+        bgp_neighbor_addr_family_details_ipv6_4: , bgp_neighbor_addr_family_state_ipv6_4: ,
+        bgp_neighbor_passwd: , bgp_neighbor_policy_map_in: "in-data", bgp_neighbor_policy_map_out: , bgp_neighbor_gnmi_group:  }
+
+    - { bgp_neighbor_ipaddr: "107.150.1.2", bgp_neighbor_remote_as: 100, bgp_neighbor_weight: , soft_reconfiguration: , bgp_neighbor_update_source: , bgp_neighbor_bfd: ,
+        bgp_neighbor_addr_family_details_ipv4_1: "ipv4 unicast", bgp_neighbor_addr_family_state_ipv4_1: "enable",
+        bgp_neighbor_addr_family_details_ipv4_2: , bgp_neighbor_addr_family_state_ipv4_2: ,
+        bgp_neighbor_addr_family_details_ipv4_3: , bgp_neighbor_addr_family_state_ipv4_3: ,
+        bgp_neighbor_addr_family_details_ipv6_1: , bgp_neighbor_addr_family_state_ipv6_1: ,
+        bgp_neighbor_addr_family_details_ipv6_2: , bgp_neighbor_addr_family_state_ipv6_2: ,
+        bgp_neighbor_addr_family_details_ipv6_3: , bgp_neighbor_addr_family_state_ipv6_3: ,
+        bgp_neighbor_addr_family_details_ipv6_4: , bgp_neighbor_addr_family_state_ipv6_4: ,
+        bgp_neighbor_passwd: , bgp_neighbor_policy_map_in: "in-data", bgp_neighbor_policy_map_out: , bgp_neighbor_gnmi_group:  }
+
+    - { bgp_neighbor_ipaddr: "107.150.4.0", bgp_neighbor_remote_as: 100, bgp_neighbor_weight: , soft_reconfiguration: "soft-reconfiguration", bgp_neighbor_update_source: , bgp_neighbor_bfd: ,
+        bgp_neighbor_addr_family_details_ipv4_1: "ipv4 multicast", bgp_neighbor_addr_family_state_ipv4_1: "enable",
+        bgp_neighbor_addr_family_details_ipv4_2: "ipv4 unicast", bgp_neighbor_addr_family_state_ipv4_2: "enable",
+        bgp_neighbor_addr_family_details_ipv4_3: , bgp_neighbor_addr_family_state_ipv4_3: ,
+        bgp_neighbor_addr_family_details_ipv6_1: , bgp_neighbor_addr_family_state_ipv6_1: ,
+        bgp_neighbor_addr_family_details_ipv6_2: , bgp_neighbor_addr_family_state_ipv6_2: ,
+        bgp_neighbor_addr_family_details_ipv6_3: , bgp_neighbor_addr_family_state_ipv6_3: ,
+        bgp_neighbor_addr_family_details_ipv6_4: , bgp_neighbor_addr_family_state_ipv6_4: ,
+        bgp_neighbor_passwd: , bgp_neighbor_policy_map_in: "in-data", bgp_neighbor_policy_map_out: , bgp_neighbor_gnmi_group:  }
+
+    - { bgp_neighbor_ipaddr: "107.150.6.2", bgp_neighbor_remote_as: 100, bgp_neighbor_weight: , soft_reconfiguration: "soft-reconfiguration", bgp_neighbor_update_source: , bgp_neighbor_bfd: ,
+        bgp_neighbor_addr_family_details_ipv4_1: "ipv4 unicast", bgp_neighbor_addr_family_state_ipv4_1: "enable",
+        bgp_neighbor_addr_family_details_ipv4_2: , bgp_neighbor_addr_family_state_ipv4_2: ,
+        bgp_neighbor_addr_family_details_ipv4_3: , bgp_neighbor_addr_family_state_ipv4_3: ,
+        bgp_neighbor_addr_family_details_ipv6_1: , bgp_neighbor_addr_family_state_ipv6_1: ,
+        bgp_neighbor_addr_family_details_ipv6_2: , bgp_neighbor_addr_family_state_ipv6_2: ,
+        bgp_neighbor_addr_family_details_ipv6_3: , bgp_neighbor_addr_family_state_ipv6_3: ,
+        bgp_neighbor_addr_family_details_ipv6_4: , bgp_neighbor_addr_family_state_ipv6_4: ,
+        bgp_neighbor_passwd: , bgp_neighbor_policy_map_in: "in-data", bgp_neighbor_policy_map_out: , bgp_neighbor_gnmi_group:  }
+
+    - { bgp_neighbor_ipaddr: "107.150.7.2", bgp_neighbor_remote_as: 100, bgp_neighbor_weight: , soft_reconfiguration: "soft-reconfiguration", bgp_neighbor_update_source: , bgp_neighbor_bfd: ,
+        bgp_neighbor_addr_family_details_ipv4_1: "ipv4 unicast", bgp_neighbor_addr_family_state_ipv4_1: "enable",
+        bgp_neighbor_addr_family_details_ipv4_2: , bgp_neighbor_addr_family_state_ipv4_2: ,
+        bgp_neighbor_addr_family_details_ipv4_3: , bgp_neighbor_addr_family_state_ipv4_3: ,
+        bgp_neighbor_addr_family_details_ipv6_1: , bgp_neighbor_addr_family_state_ipv6_1: ,
+        bgp_neighbor_addr_family_details_ipv6_2: , bgp_neighbor_addr_family_state_ipv6_2: ,
+        bgp_neighbor_addr_family_details_ipv6_3: , bgp_neighbor_addr_family_state_ipv6_3: ,
+        bgp_neighbor_addr_family_details_ipv6_4: , bgp_neighbor_addr_family_state_ipv6_4: ,
+        bgp_neighbor_passwd: , bgp_neighbor_policy_map_in: "in-data", bgp_neighbor_policy_map_out: , bgp_neighbor_gnmi_group:  }
+
+
+##########
+# PIM YAML
+##########
+pim:
+  1:
+    - { rp_addr: "107.150.0.2",  group_addr_w_mask: "224.0.0.0/4" }
+
+
+#################
+# VLANS - LAG/WAN
+#################
+vlan_def:
+  101:
+    - { description: "Subscriber-Facing VLAN on the x/x/gp1 pon", vlan_mode: "ONE2ONE" }
+  120:
+    - { description: "Data VLAN", l3_service: "ENABLED" }
+  121:
+    - { description: "SIP VLAN", l3_service: "ENABLED" }
+  122:
+    - { description: "Multicast Video VLAN", l3_service: "ENABLED" }
+  123:
+    - { description: "Unicast Video VLAN", l3_service: "ENABLED" }
+  220:
+    - { description: "Data VLAN", l3_service: "ENABLED" }
+  221:
+    - { description: "SIP VLAN", l3_service: "ENABLED" }
+  222:
+    - { description: "Multicast Video VLAN", l3_service: "ENABLED" }
+  223:
+    - { description: "Unicast Video VLAN", l3_service: "ENABLED" }
+
+
+#################
+# VLAN INTERFACE
+#################
+int_vlan:
+  120:
+    - { ipaddr_v4_w_mask: "107.150.6.1/24", vlan_state: "no shutdown"  }
+  121:
+    - { ipaddr_v4_w_mask: "107.151.0.1/30", ip_vrf_fwd: "voice",  vlan_state: "no shutdown"  }
+  122:
+    - { ipaddr_v4_w_mask: "107.150.0.1/24", ip_pim: 1, vlan_state: "no shutdown"  }
+  123:
+    - { ipaddr_v4_w_mask: "107.150.1.1/24", ip_vrf_fwd: "unicastvideo",  vlan_state: "no shutdown"  }
+  220:
+    - { ipaddr_v4_w_mask: "107.150.7.1/24", vlan_state: "no shutdown"  }
+  221:
+    - { ipaddr_v4_w_mask: "107.151.3.1/24", ip_vrf_fwd: "voice",  vlan_state: "no shutdown"  }
+  222:
+    - { ipaddr_v4_w_mask: "107.150.4.1/31", ip_pim: 1, vlan_state: "no shutdown"  }
+  223:
+    - { ipaddr_v4_w_mask: "107.150.5.1/24", ip_vrf_fwd: "unicastvideo",  vlan_state: "no shutdown"  }
+
+
+###########################
+# TRANSPORT-SERVICE-PROFILE
+###########################
+transport_service_profile:
+  uplink_lag3:
+     - { vlan_list: "120-123", description:  }
+  uplink_lag4:
+     - { vlan_list: "220-223", description:  }
+
+
+###########################
+# LAG INTERFACE CONFIG
+###########################
+int_lag:
+ la3:
+  - { gnmi_sensor_group: , description: , hash_method: "enhanced", lacp_mode: "active", lacp_actor_key: , mtu: , alarm_suppression: , role: "inni",
+      transport_service_profile: "uplink_lag3", transport_service: , vlan_monitor: , gnmi_sensor_group_vlan: , lag_state: "no shutdown" }
+ la4:
+  - { gnmi_sensor_group: , description: , hash_method: "enhanced", lacp_mode: "active", lacp_actor_key: , mtu: , alarm_suppression: , role: "inni",
+      transport_service_profile: "uplink_lag4", transport_service: , vlan_monitor: , gnmi_sensor_group_vlan: , lag_state: "no shutdown" }
+
+
+###########################
+# ETH INTERFACE CONFIG
+###########################
+int_eth:
+  1/1/x2:
+    - { eth_state: "no shutdown", gnmi_sensor: , description: "Lag-member-port for la3", fec: , alarm_suppression: , role: "lag", prot_group: , sys_lag_name: "la3" }
+  1/2/x1:
+    - { eth_state: "no shutdown", gnmi_sensor: , description: "Lag-member-port for la4", fec: , alarm_suppression: , role: "lag", prot_group: , sys_lag_name: "la4" }
+
+
+###########################
+# GRADE OF SERVICE CONFIG
+###########################
+grade_of_service:
+ - "ont-ethernet-gos-profile ont-eth-pm"
+ - "bin-gos upstream-oversize-packets"
+ - "threshold 10"
+ - "tca-name Upstream_Oversize"
+
+
+###########################
+# RG-MGMT-PROFILE CONFIG
+###########################
+rg_profile:
+  rg-mgmt-1:
+    - { acs_url: "https://my.fqdn.com", sys_username: "sys-admin", sys_password: "sys-admin" }
+
+
+#############
+# CLASS-MAPS
+#############
+class_map:                                                                                                                                                                                                                 
+  ip all_service:
+    # -----------
+    # INGRESS
+    # -----------
+    - { fn_desc: "DHCP and ARP", direction: "ingress", flow_number: 1 }
+    - rule:
+      - { number: 1, match_detail: "ethertype ARP" }
+      - { number: 2, match_detail: "protocol UDP destination-port-range BOOTPS" }
+    - { fn_desc: "ICMP", direction: "ingress", flow_number: 2 }
+    - rule:
+      - { number: 1, match_detail: "protocol ICMP destination-ipv4-prefix-list local_interfaces" }
+        #- { number: 2, match_detail: "protocol IPV6-ICMP destination-ipv6-prefix-list ALL_LOCAL_IPv6" }
+    - { fn_desc: "DNS", direction: "ingress", flow_number: 3 }
+    - rule:
+       - { number: "1", match_detail: "destination-port-range DOMAIN" }
+    - { fn_desc: "NTP", direction: "ingress", flow_number: 4 }
+    - rule:
+       - { number: "1", match_detail: "destination-port-range 123" }
+    - { fn_desc: "Voice", direction: "ingress", flow_number: 8 }
+    - rule:
+       - { number: "1", match_detail: "source-ipv4-prefix-list voip_subscriber_network" }
+    - { fn_desc: "IGMP", direction: "ingress", flow_number: 9 }
+    - rule:
+       - { number: "1", match_detail: "protocol IGMP" }
+    - { fn_desc: "allowed VOD List", direction: "ingress", flow_number: 11 }
+    - rule:
+       - { number: "1", match_detail: "destination-ipv4-prefix-list vod_server" }
+    - { fn_desc: "Allow All Traffic", direction: "ingress", flow_number: 15 }
+    - rule:
+       - { number: "1", match_detail: "destination-ip-network 0.0.0.0/0" }
+    # -----------
+    # EGRESS
+    # -----------
+    - { fn_desc: "ARP and DHCP", direction: "egress", flow_number: 1 }
+    - rule:
+       - { number: "1", match_detail: "ethertype ARP" }
+       - { number: "2", match_detail: "destination-port-range BOOTPC" }
+      #- { number: "3", match_detail: "protocol udp destination-port-range dhcpv6-client" }
+    - { fn_desc: "ICMP", direction: "egress", flow_number: 2 }
+    - rule:
+       - { number: "1", match_detail: "source-ipv4-prefix-list local_interfaces" }
+      #- { number: "2", match_detail: "protocol ipv6-icmp" }
+    - { fn_desc: "DNS", direction: "egress", flow_number: 3 }
+    - rule:
+       - { number: "1", match_detail: "source-port-range DOMAIN" }
+    - { fn_desc: "NTP", direction: "egress", flow_number: 4 }
+    - rule:
+       - { number: "1", match_detail: "source-port-range 123" }
+    - { fn_desc: "Voice", direction: "egress", flow_number: 8 }
+    - rule:
+       - { number: "1", match_detail: "destination-ipv4-prefix-list voip_subscriber_network" }
+    - { fn_desc: "IGMP", direction: "egress", flow_number: 9 }
+    - rule:
+       - { number: "1", match_detail: "protocol IGMP" }
+    - { fn_desc: "allowed VOD List", direction: "egress", flow_number: 11 }
+    - rule:
+       - { number: "1", match_detail: "source-ipv4-prefix-list vod_server" }
+    - { fn_desc: "ANY", direction: "egress", flow_number: 15 }
+    - rule:
+       - { number: "1", match_detail: "source-ip-network 0.0.0.0/0" }
+  ip fallback_class_map:
+    # -----------
+    # INGRESS
+    # -----------
+    - {fn_desc: "fallback in", direction: "ingress", flow_number: 1 }
+    - rule:
+       - { number: "1", match_detail: "destination-ip-network 0.0.0.0/0" }
+    # -----------
+    # EGRESS
+    # -----------
+    - {fn_desc: "fallback out", direction: "egress", flow_number: 1 }
+    - rule:
+       - { number: "1", match_detail: "source-ip-network 0.0.0.0/0" }
+  ip initial_class_map:
+    # -----------
+    # INGRESS
+    # -----------
+    - { fn_desc: "DHCP (in)", direction: "ingress", flow_number: 1 }
+    - rule:
+      - { number: 1, match_detail: "protocol UDP destination-port-range BOOTPS" }
+    - { fn_desc: "ARP (in)", direction: "ingress", flow_number: 2 }
+    - rule:
+      - { number: 1, match_detail: "ethertype ARP" }
+    # -----------
+    # EGRESS
+    # -----------
+    - { fn_desc: "DHCP (out)", direction: "egress", flow_number: 1 }
+    - rule:
+      - { number: 1, match_detail: "protocol UDP destination-port-range BOOTPC" }
+
+
+################
+# POLICY-MAP CFG
+################
+policy_map:
+  fallback_policy_map:
+   - { class_map_ip: "fallback_class_map" }
+   - { egress_flow_no: 1 }
+   - { ingress_flow_no: 1 }
+
+  initial_policy_map:
+   - { class_map_ip: "initial_class_map" }
+   - { egress_flow_no: 1 }
+   - { ingress_flow_no: 1, ingress_meter_eir: 64 }
+   - { ingress_flow_no: 2, ingress_meter_eir: 64 }
+
+  policy_map-hsi_100m:
+   - { class_map_ip: "all_service" }
+   - { traffic_class: 1, egress_shaper: "yes", es_max: 100000 }
+   - { traffic_class: 2, egress_shaper: "yes", es_max: 64 }
+   - { egress_flow_no: 1 , traffic_class_sub: 2}
+   - { egress_flow_no: 2 , traffic_class_sub: 2}
+   - { egress_flow_no: 3 , traffic_class_sub: 2}
+   - { egress_flow_no: 4 , traffic_class_sub: 2}
+   - { egress_flow_no: 15 , traffic_class_sub: 1}
+   - { ingress_flow_no: 1 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 2 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 3 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 4 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 15 , ingress_meter_eir: 100000, ingress_meter_ebs: 10000 }
+   - { egress: "shaper", scheduling_type: "2SP-6WRR", egress_bw: , ebm_parent_cos: "cos2", ebm_parent_cos_min: , ebm_parent_max: "300000", ebm_parent_min: "0",
+       eb_min_max_parent_cos: , eb_min_parent_cos: , eb_min_parent_max: , eb_min_parent_weight:  }
+
+  policy_map-video:
+   - { class_map_ip: "all_service" }
+   - { traffic_class: 1 }
+   - { traffic_class: 2, egress_shaper: "yes", es_max: 64, es_min: 64}
+   - { egress_flow_no: 1 , traffic_class_sub: 2}
+   - { egress_flow_no: 2 , traffic_class_sub: 2}
+   - { egress_flow_no: 3 , traffic_class_sub: 2}
+   - { egress_flow_no: 4 , traffic_class_sub: 2}
+   - { egress_flow_no: 9 , traffic_class_sub: 2}
+   - { egress_flow_no: 11 , traffic_class_sub: 1}
+   - { egress_flow_no: 15 , traffic_class_sub: 1}
+   - { ingress_flow_no: 1 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 2 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 3 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 4 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 9 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 11, ingress_meter_cir: 64, ingress_meter_cbs: 20000, ingress_meter_ebs: 20000, ingress_meter_eir: 10000 }
+   - { ingress_flow_no: 15 , ingress_meter_eir: 100000, ingress_meter_ebs: 10000 }
+   - { egress: "shaper", scheduling_type: "2SP-6WRR", egress_bw: , ebm_parent_cos: "cos3", ebm_parent_cos_min: "cos2", ebm_parent_max: "100000", ebm_parent_min: "20000",
+       eb_min_max_parent_cos: , eb_min_parent_cos: , eb_min_parent_max: , eb_min_parent_weight:  }
+
+  policy_map-voice:
+   - { class_map_ip: "all_service" }
+   - { traffic_class: 1, egress_shaper: "yes", es_max: 512, es_min: 512}
+   - { traffic_class: 2, egress_shaper: "yes", es_max: 64, es_min: 64}
+   - { egress_flow_no: 1 , traffic_class_sub: 2}
+   - { egress_flow_no: 2 , traffic_class_sub: 2}
+   - { egress_flow_no: 3 , traffic_class_sub: 2}
+   - { egress_flow_no: 4 , traffic_class_sub: 2}
+   - { egress_flow_no: 8 , traffic_class_sub: 1}
+   - { egress_flow_no: 15 , egress_action: "deny"}
+   - { ingress_flow_no: 1 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 2 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 3 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 4 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 9 , ingress_meter_cir: 64, ingress_meter_cbs: 20000 }
+   - { ingress_flow_no: 11, ingress_meter_cir: 64, ingress_meter_cbs: 20000, ingress_meter_ebs: 20000, ingress_meter_eir: 10000 }
+   - { ingress_flow_no: 15 , ingress_action: "deny" }
+   - { egress: "shaper", scheduling_type: , egress_bw: , ebm_parent_cos: "cos7", ebm_parent_cos_min: , ebm_parent_max: "768", ebm_parent_min: "768",
+       eb_min_max_parent_cos: , eb_min_parent_cos: , eb_min_parent_max: , eb_min_parent_weight:  }
+
+
+################
+# MULTIBIND INT
+################
+int_mb:
+  datamb:
+    - { description: "multibind for data & mcast on default VRF", ip_addr_v4_w_mask: "107.150.16.1/20", ip_addr_v6_w_mask: , proxy_arp: , mb_state: "no shutdown" }
+  videomb:
+    - { ip_vrf: "unicastvideo", ip_addr_v4_w_mask_vrf: "107.150.128.1/20", description: "multibind for unicast video", proxy_arp: , mb_state: "no shutdown" }
+  voicemb:
+    - { ip_vrf: "voice", ip_addr_v4_w_mask_vrf: "107.128.128.25/29", description: "multibind for voice", proxy_arp: , mb_state: "no shutdown"}
+################
+# DHCP RELAY CFG
+################
+dhcp_relay_server:
+  hsi:
+   - { helper_no: 1, helper_addr: "20.10.30.39" }
+   - { helper_no: 2, helper_addr: "20.10.30.40" }
+   - { relay_addr: "10.30.60.1", l2_dhcp_profile: "l2-dhcp-prof-1" }
+  video:
+   - { helper_no: 1, helper_addr: "30.10.30.39" }
+   - { relay_addr: "10.30.70.1", vrf: "unicastvideo", l2_dhcp_profile: "l2-dhcp-prof-1" }
+  voice:
+   - { helper_no: 1, helper_addr: "40.10.30.39" }
+   - { relay_addr: "10.30.70.1", vrf: "voice", l2_dhcp_profile: "l2-dhcp-prof-1" }
+

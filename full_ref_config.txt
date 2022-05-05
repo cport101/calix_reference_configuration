@@ -1,0 +1,885 @@
+
+ip host petnis01.calix.local 172.23.43.251
+ip host sjclnx-st01.calix.local 10.200.0.204
+ip host slc-scratch.caal.dev 10.136.10.34
+ntp server 1 petnis01.calix.local
+ntp server 2 sjclnx-st01.calix.local
+ntp source-interface system-craft
+aaa authentication-order tacacs-then-local
+aaa tacacs source-interface system-craft
+aaa tacacs server 10.200.0.212 secret  $1001$U2FsdGVkX1+jB4mHhWV3OLaDrEFbkm3smdVAG/kTC3Z1OQ==
+aaa user calixsupport password $1$qdmQFTMT$aaOZdqIzWwQsfSU5pc4XT0 role calixsupport
+aaa user monitor password $1$bo6RaxHE$prYA2waVd/o4atvb1H8l8/ role oper
+aaa user networkadmin password $1$henWME92$LqNxDU3.wWG19Fz.AlL5H0 role networkadmin
+aaa user support password $1$s4LUL/4m$aQjOzqPRi/CUHpaYTGLGz/ role oper
+aaa user sysadmin password $1$.fwnoBuy$fmIOhTEfd3RGyOSiwaQA40 role admin
+ip prefix-list netconf-access
+ seq 10 172.23.34.0/24
+ !
+ip prefix-list copp-acl-e9host
+ seq 10 15.10.10.0/24
+ seq 20 15.10.11.0/24
+ seq 30 15.10.12.0/24
+ seq 40 15.10.13.0/24
+ seq 50 15.10.14.0/24
+ seq 60 15.10.15.0/24
+ seq 70 15.10.16.0/24
+ seq 80 15.10.17.0/24
+ seq 90 15.10.18.0/24
+ seq 100 15.10.19.0/24
+ seq 110 15.10.20.0/24
+ seq 120 15.10.21.0/24
+ seq 130 15.10.22.0/24
+ seq 140 15.10.23.0/24
+ seq 150 15.10.24.0/24
+ seq 160 15.10.25.0/24
+ seq 170 15.10.26.0/24
+ seq 180 15.10.27.0/24
+ seq 190 15.10.28.0/24
+ seq 200 15.10.29.0/24
+ seq 210 15.10.30.0/24
+ seq 220 15.10.31.0/24
+ seq 230 15.10.32.0/24
+ seq 240 15.10.33.0/24
+ seq 250 15.10.34.0/24
+ seq 260 15.10.35.0/24
+ seq 270 15.10.36.0/24
+ seq 280 15.10.37.0/24
+ seq 290 140.1.1.1/32
+ seq 300 15.0.0.1/32
+ seq 310 15.0.0.0/24
+ !
+ip prefix-list local_interfaces
+ seq 10 10.28.123.129/32
+ seq 20 15.0.0.1/32
+ seq 30 10.28.120.129/32
+ seq 50 107.150.15.1/32
+ seq 55 107.150.16.1/32
+ seq 60 107.150.128.1/32
+ seq 65 107.150.144.1/32
+ seq 70 107.150.64.1/32
+ seq 75 107.150.0.1/32
+ seq 80 107.150.4.1/32
+ seq 85 10.29.84.1/32
+ seq 90 10.29.86.1/32
+ seq 95 10.29.85.1/32
+ seq 100 192.168.7.1/32
+ seq 105 10.28.120.129/32
+ !
+ip prefix-list ssh_config_servers_oob
+ seq 10 10.201.32.0/22
+ !
+ip prefix-list vod_server
+ seq 10 10.20.0.0/16
+ !
+ip prefix-list voip_subscriber_network
+ seq 10 10.28.123.128/25
+ !
+ip prefix-list in-data
+ seq 5 0.0.0.0/0
+ !
+ip prefix-list in-video
+ seq 5 0.0.0.0/0
+ !
+ip prefix-list in-voice
+ seq 5 0.0.0.0/0
+ !
+ip prefix-list out-data
+ seq 5 107.150.16.0/20 ge 20 le 20
+ seq 10 107.150.128.0/20 ge 20 le 20
+ !
+ip prefix-list out-video
+ seq 5 49.49.49.0/24
+ !
+ip prefix-list out-voice
+ seq 5 59.59.59.0/24
+ seq 10 10.128.128.0/29 ge 29 le 29
+ !
+access-list ipv4 craft_interface_control_ipv4
+ rule 30 description dst-traceroute
+ rule 30 match protocol udp destination-port-range 33434-33523
+ rule 30 action permit  count
+ rule 60 description "allow-src-sp_ssh 01"
+ rule 60 match protocol tcp destination-port-range ssh
+ rule 60 match source-ipv4-prefix-list ssh_config_servers_oob destination-port-range ssh
+ rule 60 action permit   count
+ rule 70 description allow-src-sp_netconf
+ rule 70 match protocol tcp destination-port-range 830
+ rule 70 match source-ipv4-prefix-list netconf-access destination-port-range 830
+ rule 70 action permit   count
+ rule 255 description deny-all
+ rule 255 match any
+ rule 255 action deny  count
+ !
+access-list ipv4 control_plane_access_list_ipv4
+ description "control plane filter ipv4"
+ rule 10 description limit-10m-dst-dhcp
+ rule 10 match protocol UDP source-port-range 68 destination-port-range 67-68
+ rule 10 action permit cpu-cosq 28 count
+ rule 22 match source-ipv4-network 107.150.0.2/32 protocol TCP destination-port-range 179
+ rule 22 action permit cpu-cosq 42 count
+ rule 23 match source-ipv4-network 107.150.0.1/32 protocol TCP source-port-range 179
+ rule 23 action permit cpu-cosq 43 count
+ rule 29 description limit-srcdst-icmp-sp
+ rule 29 match protocol ICMP 
+ rule 29 action permit cpu-cosq 2 count
+ rule 30 description limit-1m-dst-traceroute
+ rule 30 match protocol UDP destination-port-range 33434-33523
+ rule 30 action permit cpu-cosq 3 count
+ rule 38 description access_to_voice_server
+ rule 38 match destination-ipv4-prefix-list out-voice 
+ rule 38 action permit cpu-cosq 44 count
+ rule 40 description access_to_VOD_server
+ rule 40 match destination-ipv4-prefix-list vod_server 
+ rule 40 action permit   count
+ rule 52 match source-port-range BOOTPC
+ rule 52 action permit cpu-cosq 6 count
+ rule 61 description "E9 access"
+ rule 61 match destination-ipv4-prefix-list copp-acl-e9host 
+ rule 61 action permit   count
+ rule 255 description deny-all
+ rule 255 match any
+ rule 255 action deny  count
+ !
+cos cosq-profile cosq-control_plane
+ cosq-entry 1
+  bandwidth maximum 1000
+  !
+ cosq-entry 2
+  bandwidth maximum 1000
+  !
+ cosq-entry 3
+  bandwidth maximum 1000
+  !
+ cosq-entry 4
+  bandwidth maximum 500
+  !
+ cosq-entry 5
+  bandwidth maximum 500
+  !
+ cosq-entry 6
+  bandwidth maximum 500
+  !
+ cosq-entry 7
+  bandwidth maximum 1000
+  !
+ cosq-entry 10
+  bandwidth maximum 1000
+  !
+ cosq-entry 11
+  bandwidth maximum 64
+  !
+ cosq-entry 12
+  bandwidth maximum 64
+  queue-depth    128000
+  !
+ cosq-entry 13
+  !
+ cosq-entry 14
+  !
+ cosq-entry 15
+  !
+ cosq-entry 16
+  !
+ cosq-entry 25
+  bandwidth maximum 1000
+  !
+ cosq-entry 26
+  bandwidth maximum 10000
+  !
+ cosq-entry 27
+  !
+ cosq-entry 28
+  bandwidth maximum 10000
+  !
+ cosq-entry 30
+  !
+ cosq-entry 31
+  bandwidth maximum 1000
+  !
+ cosq-entry 32
+  bandwidth maximum 500
+  !
+ cosq-entry 33
+  !
+ cosq-entry 34
+  !
+ cosq-entry 35
+  bandwidth maximum 500
+  !
+ cosq-entry 36
+  bandwidth maximum 500
+  !
+ cosq-entry 37
+  bandwidth maximum 128
+  !
+ cosq-entry 40
+  !
+ cosq-entry 41
+  bandwidth maximum 1000
+  !
+ cosq-entry 42
+  bandwidth maximum 10000
+  !
+ cosq-entry 43
+  bandwidth maximum 10000
+  !
+ cosq-entry 44
+  bandwidth maximum 1000
+  !
+ !
+cos cosq-profile pon-cos
+ cosq-group-scheduling-type 3SP-3WRR
+ cosq-entry 1
+  !
+ !
+interface system-craft 1
+ description "System Craft for Triple_play"
+ ip dhcp server disable
+ ip address 10.137.13.194/32
+ no shutdown
+ !
+interface craft 1/1/2
+ description "craft interface 1/1/2"
+ access-group ipv4-acl craft_interface_control_ipv4
+ ip dhcp server disable
+ ip address 10.137.13.195/21
+ !
+ no shutdown
+!
+interface craft 1/2/2
+ description "craft interface 1/2/2"
+ access-group ipv4-acl craft_interface_control_ipv4
+ ip dhcp server disable
+ ip address 10.137.13.196/21
+ !
+ no shutdown
+!
+control-plane cosq cosq-control_plane
+control-plane access-group ipv4-acl control_plane_access_list_ipv4
+!
+
+
+redist-map out-data 5
+ match prefix-list out-data
+ !
+redist-map out-video 5
+ match prefix-list out-video
+ !
+redist-map out-voice 5
+ match prefix-list out-voice
+ !
+ip vrf unicastvideo
+ description "Unicast Video VRF"
+ ip route 0.0.0.0/0 next-hop NULL0 distance 255
+ router bgp 65501
+  redistribute connected redist-map out-video
+  router-id 107.150.15.100
+  graceful-restart          enable
+  graceful-restart stalepath-time 360
+  bgp-policy-map in-video
+   rule 5
+    address-family ipv4-unicast
+    match prefix-list in-video
+    !
+   !
+   neighbor 107.150.4.2
+   remote-as            100
+   bgp-policy-map in-video in
+   !
+   neighbor 107.150.4.0
+   remote-as            100
+   bgp-policy-map in-video in
+   !
+ !
+!
+ip vrf voice
+ description "Voice VRF"
+ ip route 0.0.0.0/0 next-hop NULL0 distance 255
+ router bgp 65501
+  redistribute connected redist-map out-voice
+  router-id 107.150.15.10
+  graceful-restart          enable
+  graceful-restart stalepath-time 360
+  bgp-policy-map in-voice
+   rule 5
+    address-family ipv4-unicast
+    match prefix-list in-voice
+    !
+   rule 10
+    address-family ipv4-unicast
+    deny
+    !
+   !
+   !
+   neighbor 107.150.4.0
+   remote-as            100
+   bgp-policy-map in-voice in
+   !
+   neighbor 107.150.4.2
+   remote-as            100
+   bgp-policy-map in-voice in
+   !
+ !
+!
+interface loopback 1
+ ip address 107.150.15.1/32
+ !
+ no shutdown
+!
+interface loopback 2
+ ip vrf forwarding voice
+ ip address 107.150.15.10/32
+ !
+ no shutdown
+!
+interface loopback 3
+ ip vrf forwarding unicastvideo
+ ip address 107.150.15.100/32
+ !
+ no shutdown
+!
+router bgp 65501
+ redistribute connected redist-map out-data
+ graceful-restart          enable
+ graceful-restart stalepath-time 360
+ maximum-paths ebgp 2
+ bgp-policy-map in-data
+ rule 5
+   address-family ipv4-unicast
+     match prefix-list in-data
+    !
+  !
+ rule 10
+   address-family ipv4-unicast
+     deny
+     !
+  !
+ !
+ neighbor 107.150.0.2
+  remote-as            100
+  address-family ipv4 unicast
+  enable
+  !
+  address-family ipv4 multicast
+  enable
+  !
+  bgp-policy-map in-data in
+  !
+ neighbor 107.150.1.2
+  remote-as            100
+  address-family ipv4 unicast
+  enable
+  !
+  bgp-policy-map in-data in
+  !
+ neighbor 107.150.4.0
+  remote-as            100
+  soft-reconfiguration
+  address-family ipv4 multicast
+  enable
+  !
+  address-family ipv4 unicast
+  enable
+  !
+  bgp-policy-map in-data in
+  !
+ neighbor 107.150.6.2
+  remote-as            100
+  soft-reconfiguration
+  address-family ipv4 unicast
+  enable
+  !
+  bgp-policy-map in-data in
+  !
+ neighbor 107.150.7.2
+  remote-as            100
+  soft-reconfiguration
+  address-family ipv4 unicast
+  enable
+  !
+  bgp-policy-map in-data in
+  !
+ !
+!
+
+
+router pim 1
+ rp-address 107.150.0.2 group-address 224.0.0.0/4
+!
+vlan 101
+ mode ONE2ONE
+ description "Subscriber-Facing VLAN on the x/x/gp1 pon"
+ 
+!
+vlan 120
+ description "Data VLAN"
+ l3-service  ENABLED
+ 
+!
+vlan 121
+ description "SIP VLAN"
+ l3-service  ENABLED
+ 
+!
+vlan 122
+ description "Multicast Video VLAN"
+ l3-service  ENABLED
+ 
+!
+vlan 123
+ description "Unicast Video VLAN"
+ l3-service  ENABLED
+ 
+!
+vlan 220
+ description "Data VLAN"
+ l3-service  ENABLED
+ 
+!
+vlan 221
+ description "SIP VLAN"
+ l3-service  ENABLED
+ 
+!
+vlan 222
+ description "Multicast Video VLAN"
+ l3-service  ENABLED
+ 
+!
+vlan 223
+ description "Unicast Video VLAN"
+ l3-service  ENABLED
+ 
+!
+interface vlan 120
+ ip address 107.150.6.1/24
+ no shutdown
+!
+interface vlan 121
+ ip vrf forwarding voice
+ ip address 107.151.0.1/30
+ no shutdown
+!
+interface vlan 122
+ ip address 107.150.0.1/24
+ ip pim 1
+ no shutdown
+!
+interface vlan 123
+ ip vrf forwarding unicastvideo
+ ip address 107.150.1.1/24
+ no shutdown
+!
+interface vlan 220
+ ip address 107.150.7.1/24
+ no shutdown
+!
+interface vlan 221
+ ip vrf forwarding voice
+ ip address 107.151.3.1/24
+ no shutdown
+!
+interface vlan 222
+ ip address 107.150.4.1/31
+ ip pim 1
+ no shutdown
+!
+interface vlan 223
+ ip vrf forwarding unicastvideo
+ ip address 107.150.5.1/24
+ no shutdown
+!
+transport-service-profile uplink_lag3
+ vlan-list 120-123
+!
+transport-service-profile uplink_lag4
+ vlan-list 220-223
+!
+
+interface lag la3
+ hash-method               enhanced
+ lacp-mode                 active
+ role                      inni
+ transport-service-profile uplink_lag3
+ no shutdown
+ 
+!
+interface lag la4
+ hash-method               enhanced
+ lacp-mode                 active
+ role                      inni
+ transport-service-profile uplink_lag4
+ no shutdown
+ 
+!
+
+
+
+interface ethernet 1/1/x2
+ description       "Lag-member-port for la3"
+ no shutdown
+ role              lag
+ system-lag        la3
+ !
+
+interface ethernet 1/2/x1
+ description       "Lag-member-port for la4"
+ no shutdown
+ role              lag
+ system-lag        la4
+ !
+grade-of-service
+ont-ethernet-gos-profile ont-eth-pm
+bin-gos upstream-oversize-packets
+threshold 10
+tca-name Upstream_Oversize
+!
+!
+!
+
+
+rg-mgmt-profile rg-mgmt-1
+ acs-url https://my.fqdn.com
+ username sys-admin
+ password sys-admin
+ !
+class-map ip all_service
+ ingress-flow 1
+ description "DHCP and ARP"
+  rule 1 match ethertype ARP
+  rule 2 match protocol UDP destination-port-range BOOTPS
+  !
+ ingress-flow 2
+ description "ICMP"
+  rule 1 match protocol ICMP destination-ipv4-prefix-list local_interfaces
+  !
+ ingress-flow 3
+ description "DNS"
+  rule 1 match destination-port-range DOMAIN
+  !
+ ingress-flow 4
+ description "NTP"
+  rule 1 match destination-port-range 123
+  !
+ ingress-flow 8
+ description "Voice"
+  rule 1 match source-ipv4-prefix-list voip_subscriber_network
+  !
+ ingress-flow 9
+ description "IGMP"
+  rule 1 match protocol IGMP
+  !
+ ingress-flow 11
+ description "allowed VOD List"
+  rule 1 match destination-ipv4-prefix-list vod_server
+  !
+ ingress-flow 15
+ description "Allow All Traffic"
+  rule 1 match destination-ip-network 0.0.0.0/0
+  !
+ egress-flow 1
+ description "ARP and DHCP"
+  rule 1 match ethertype ARP
+  rule 2 match destination-port-range BOOTPC
+  !
+ egress-flow 2
+ description "ICMP"
+  rule 1 match source-ipv4-prefix-list local_interfaces
+  !
+ egress-flow 3
+ description "DNS"
+  rule 1 match source-port-range DOMAIN
+  !
+ egress-flow 4
+ description "NTP"
+  rule 1 match source-port-range 123
+  !
+ egress-flow 8
+ description "Voice"
+  rule 1 match destination-ipv4-prefix-list voip_subscriber_network
+  !
+ egress-flow 9
+ description "IGMP"
+  rule 1 match protocol IGMP
+  !
+ egress-flow 11
+ description "allowed VOD List"
+  rule 1 match source-ipv4-prefix-list vod_server
+  !
+ egress-flow 15
+ description "ANY"
+  rule 1 match source-ip-network 0.0.0.0/0
+  !
+ !
+class-map ip fallback_class_map
+ ingress-flow 1
+ description "fallback in"
+  rule 1 match destination-ip-network 0.0.0.0/0
+  !
+ egress-flow 1
+ description "fallback out"
+  rule 1 match source-ip-network 0.0.0.0/0
+  !
+ !
+class-map ip initial_class_map
+ ingress-flow 1
+ description "DHCP (in)"
+  rule 1 match protocol UDP destination-port-range BOOTPS
+  !
+ ingress-flow 2
+ description "ARP (in)"
+  rule 1 match ethertype ARP
+  !
+ egress-flow 1
+ description "DHCP (out)"
+  rule 1 match protocol UDP destination-port-range BOOTPC
+  !
+ !
+policy-map fallback_policy_map
+ class-map-ip fallback_class_map
+  egress-flow 1
+   !
+  ingress-flow 1
+   !
+  !
+!
+policy-map initial_policy_map
+ class-map-ip initial_class_map
+  egress-flow 1
+   !
+  ingress-flow 1
+   ingress-meter eir 64
+   !
+  ingress-flow 2
+   ingress-meter eir 64
+   !
+  !
+!
+policy-map policy_map-hsi_100m
+ class-map-ip all_service
+  traffic-class 1
+   egress-shaper maximum 100000
+   !
+  traffic-class 2
+   egress-shaper maximum 64
+   !
+  egress-flow 1
+   traffic-class 2
+   !
+  egress-flow 2
+   traffic-class 2
+   !
+  egress-flow 3
+   traffic-class 2
+   !
+  egress-flow 4
+   traffic-class 2
+   !
+  egress-flow 15
+   traffic-class 1
+   !
+  ingress-flow 1
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 2
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 3
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 4
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 15
+   ingress-meter eir 100000
+   ingress-meter ebs-bytes 10000
+   !
+  egress shaper
+   scheduling-type 2SP-6WRR
+   max-parent-cos cos2
+    maximum        300000
+    minimum        0
+   !
+  !
+!
+policy-map policy_map-video
+ class-map-ip all_service
+  traffic-class 1
+   !
+  traffic-class 2
+   egress-shaper maximum 64
+   egress-shaper minimum 64
+   !
+  egress-flow 1
+   traffic-class 2
+   !
+  egress-flow 2
+   traffic-class 2
+   !
+  egress-flow 3
+   traffic-class 2
+   !
+  egress-flow 4
+   traffic-class 2
+   !
+  egress-flow 9
+   traffic-class 2
+   !
+  egress-flow 11
+   traffic-class 1
+   !
+  egress-flow 15
+   traffic-class 1
+   !
+  ingress-flow 1
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 2
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 3
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 4
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 9
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 11
+   ingress-meter cir 64
+   ingress-meter eir 10000
+   ingress-meter cbs-bytes 20000
+   ingress-meter ebs-bytes 20000
+   !
+  ingress-flow 15
+   ingress-meter eir 100000
+   ingress-meter ebs-bytes 10000
+   !
+  egress shaper
+   scheduling-type 2SP-6WRR
+   max-parent-cos cos3
+    min-parent-cos cos2
+    maximum        100000
+    minimum        20000
+   !
+  !
+!
+policy-map policy_map-voice
+ class-map-ip all_service
+  traffic-class 1
+   egress-shaper maximum 512
+   egress-shaper minimum 512
+   !
+  traffic-class 2
+   egress-shaper maximum 64
+   egress-shaper minimum 64
+   !
+  egress-flow 1
+   traffic-class 2
+   !
+  egress-flow 2
+   traffic-class 2
+   !
+  egress-flow 3
+   traffic-class 2
+   !
+  egress-flow 4
+   traffic-class 2
+   !
+  egress-flow 8
+   traffic-class 1
+   !
+  egress-flow 15
+   deny
+  !
+  ingress-flow 1
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 2
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 3
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 4
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 9
+   ingress-meter cir 64
+   ingress-meter cbs-bytes 20000
+   !
+  ingress-flow 11
+   ingress-meter cir 64
+   ingress-meter eir 10000
+   ingress-meter cbs-bytes 20000
+   ingress-meter ebs-bytes 20000
+   !
+  ingress-flow 15
+   deny
+  !
+  egress shaper
+   max-parent-cos cos7
+    maximum        768
+    minimum        768
+   !
+  !
+!
+interface multibind datamb
+ ip address 107.150.16.1/20
+ description "multibind for data & mcast on default VRF"
+ no shutdown
+!
+interface multibind videomb
+ ip vrf forwarding unicastvideo
+   ip address 107.150.128.1/20
+ !
+ description "multibind for unicast video"
+ no shutdown
+!
+interface multibind voicemb
+ ip vrf forwarding voice
+   ip address 107.128.128.25/29
+ !
+ description "multibind for voice"
+ no shutdown
+!
+id-profile id-prof-1
+circuit-id "%SystemId Eth %Shelf/%Slot/%Port/%OntPort:%CTag"
+remote-id %OntIfSID
+!
+l2-dhcp-profile l2-dhcp-prof-1
+id-name id-prof-1
+!
+dhcp-v4-relay-profile hsi
+ helper-address 1 20.10.30.39
+ helper-address 2 20.10.30.40
+ relay-agent-address 10.30.60.1
+ l2-dhcp-profile l2-dhcp-prof-1
+!
+dhcp-v4-relay-profile video
+ helper-address 1 30.10.30.39
+ relay-agent-address 10.30.70.1
+ vrf unicastvideo
+ l2-dhcp-profile l2-dhcp-prof-1
+!
+dhcp-v4-relay-profile voice
+ helper-address 1 40.10.30.39
+ relay-agent-address 10.30.70.1
+ vrf voice
+ l2-dhcp-profile l2-dhcp-prof-1
+!

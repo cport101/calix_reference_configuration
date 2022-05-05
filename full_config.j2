@@ -1,0 +1,1120 @@
+
+{#
+ ########################
+ # BASIC SETTINGS
+ ########################
+-#}
+{% for sh in ipv4_static_hosts -%}
+{% set attb = ipv4_static_hosts[sh] -%}
+{% for i in attb -%}
+ip host {{ i.name_fqdn }} {{ i.ipv4_addr }}
+{% endfor -%}
+{% endfor -%}
+{% for ts in ipv4_ntp_servers -%}
+{% set list_ts = ipv4_ntp_servers[ts] -%}
+{% for i in list_ts -%}
+{% if (i.ntp_srv_no is defined) and (i.ntp_srv_no is not none) -%}
+ntp server {{ i.ntp_srv_no }} {{ i.ntp_fqdn }}
+{% endif -%}
+{% if (i.source_int is defined) and (i.source_int is not none) -%}
+ntp source-interface {{ i.source_int }}
+{% endif -%}
+{% endfor -%}
+{% endfor -%}
+aaa authentication-order {{ aaa.auth_order }}
+aaa tacacs source-interface {{ aaa.source_interface }}
+aaa tacacs server {{ aaa.tac_srv_ipaddr }} secret  {{ aaa.tacacs_secret }}
+{% for login, passwd, role  in aaa.user -%}
+aaa user {{ login }} password {{ passwd }} role {{ role }}
+{% endfor -%}
+
+
+{#
+ ##################
+ # IPV4 PREFIX LIST
+ ##################
+-#}
+{% for pl in ip_prefix_list -%}
+{% set attb =  ip_prefix_list[pl] -%}
+ip prefix-list {{ pl }}
+ {% for i in attb -%}
+ seq {{ i.seq_no }} {{ i.seq_match }}
+ {% endfor -%}
+ {% if loop.cycle -%}
+!
+{%endif -%}
+{% endfor -%}
+
+
+{#
+ ##################
+ # ACL RULES
+ ##################
+-#}
+{% for acl in acl_list -%}
+{% set attrb0 = acl_list[acl] -%}
+{% for i in attrb0 -%}
+{%- if (i.ipv4 is defined) and i.ipv4 == "yes" -%}
+access-list ipv4 {{ acl }}
+ {% endif -%}
+ {% if (i.description is defined) and (i.description is not none) -%}
+ description "{{ i.description }}"
+ {% endif -%}
+ {% if (i.rule_desc is defined) and (i.rule_desc is not none) -%}
+ rule {{ i.rule_no }} description {{ i.rule_desc }}
+ {% endif -%}
+ {% if (i.rule_match_proto is defined) and (i.rule_match_proto is not none) -%}
+ rule {{ i.rule_no }} match protocol {{ i.rule_match_proto }} {{ i.rule_match_specs }}
+ {% endif -%}
+ {% if (i.rule_match_src_prefix is defined) and (i.rule_match_src_prefix is not none) -%}
+ rule {{ i.rule_no }} match source-ipv4-prefix-list {{ i.rule_match_src_prefix }} {{ i.rule_match_specs }}
+ {% endif -%}
+ {% if (i.rule_match_dest_prefix is defined) and (i.rule_match_dest_prefix is not none) -%}
+ rule {{ i.rule_no }} match destination-ipv4-prefix-list {{ i.rule_match_dest_prefix }} {{ i.rule_match_specs }}
+ {% endif -%}
+ {% if (i.rule_match_any is defined) and (i.rule_match_any is not none) -%}
+ rule {{ i.rule_no }} match {{ i.rule_match_any }}
+ {% endif -%}
+ {% if (i.rule_match_misc is defined) and (i.rule_match_misc is not none) -%}
+ rule {{ i.rule_no }} match {{ i.rule_match_misc }}
+ {% endif -%}
+ {% if (i.rule_action is defined) and (i.rule_action is not none) -%}
+ rule {{ i.rule_no }} action {{ i.rule_action }} {{ i.rule_cpu_cosq }} {{ i.rule_count }}
+ {% endif -%}
+{% if (i.ipv6 is defined) and i.ipv6 == "yes" %}
+access-list ipv6 {{ acl }}
+{% endif -%}
+ {% if i.description_v6 is defined and not none %}
+ description "{{ i.description_v6 }}"
+ {% endif -%}
+ {% if (i.rule_desc_v6 is defined) and (i.rule_desc_v6 is not none) -%}
+ rule {{ i.rule_no_v6 }} description {{ i.rule_desc_v6 }}
+ {% endif -%}
+ {% if (i.rule_match_proto_v6 is defined) and (i.rule_match_proto_v6 is not none) -%}
+ rule {{ i.rule_no_v6 }} match {{ i.rule_match_proto_v6 }} {{ i.rule_match_specs_v6 }}
+ {% endif -%}
+ {% if (i.rule_match_src_prefix_v6 is defined) and (i.rule_match_src_prefix_v6 is not none) -%}
+ rule {{ i.rule_no_v6 }} match source-ipv6-prefix-list {{ i.rule_match_src_prefix_v6 }} {{ i.rule_match_specs_v6 }}
+ {% endif -%}
+ {% if (i.rule_match_dest_prefix_v6 is defined) and (i.rule_match_dest_prefix_v6 is not none) -%}
+ rule {{ i.rule_no_v6 }} match destination-ipv6-prefix-list {{ i.rule_match_dest_prefix_v6 }} {{ i.rule_match_specs_v6 }}
+ {% endif -%}
+ {% if (i.rule_match_any_v6 is defined) and (i.rule_match_any_v6 is not none) -%}
+ rule {{ i.rule_no_v6 }} match {{ i.rule_match_any_v6 }}
+ {% endif -%}
+ {% if (i.rule_action_v6 is defined) and (i.rule_action_v6 is not none) -%}
+ rule {{ i.rule_no_v6 }} action {{ i.rule_action_v6 }} {{ i.rule_cpu_cosq_v6 }} {{ i.rule_count_v6 }}
+ {% endif -%}
+{% endfor -%}
+!
+{% endfor -%}
+
+
+{#
+ ##################
+ # COS COSQ PROFILE
+ ##################
+-#}
+{% for cos in cos_profile -%}
+cos cosq-profile {{ cos }}
+ {% set attr0 = cos_profile[cos] -%}
+ {% for i in attr0 -%}
+ {% if (i.cosq_group_scheduling_type is defined) and (i.cosq_group_scheduling_type is not none) -%}
+ cosq-group-scheduling-type {{ i.cosq_group_scheduling_type }}
+ {% endif -%}
+ {% if (i.cosq_entry is defined) and (i.cosq_entry is not none) -%}
+ cosq-entry {{ i.cosq_entry }}
+  {% endif -%}
+  {% if (i.max_bandwidth is defined) and (i.max_bandwidth is not none) -%}
+  bandwidth maximum {{ i.max_bandwidth }}
+  {% endif -%}
+  {% if (i.queue_depth is defined) and (i.queue_depth is not none) -%}
+  queue-depth    {{ i.queue_depth }}
+  {% endif -%}
+  {% if (i.discard_policy is defined) and (i.discard_policy is not none) -%}
+  discard-policy {{ i.discard_policy }}
+  {% endif -%}
+ {% if loop.cycle -%}
+ !
+ {% endif -%}
+ {% endfor -%}
+{%- if loop.cycle -%}
+!
+{% endif -%}
+{% endfor -%}
+
+
+{#
+ ########################
+ # SYSTEM CRAFT INTERFACE
+ ########################
+-#}
+{% for sys_int in sys_craft -%}
+{% set attrb0 = sys_craft[sys_int] -%}
+interface system-craft {{ sys_int }}
+ {% for i in attrb0 -%}
+ {% if (i.desc is defined) and (i.desc is not none) -%}
+ description "{{ i.desc }}"
+ {% endif -%}
+ {% if (i.dhcp_server_state is defined) and (i.dhcp_server_state is not none) -%}
+ ip dhcp server {{ i.dhcp_server_state }}
+ {% endif -%}
+ {% if (i.dhcp_fwd_vrf is defined) and (i.dhcp_fwd_vrf is not none) -%}
+ ip vrf forwarding {{ i.dhcp_fwd_vrf }}
+  {% if (i.dhcp_fwd_vrf_ipv4 is defined) and (i.dhcp_fwd_vrf_ipv4 is not none) -%}
+  ip address {{ i.dhcp_fwd_vrf_ipv4 }}
+  {% endif -%}
+  {% if (i.dhcp_fwd_vrf_ipv6 is defined) and (i.dhcp_fwd_vrf_ipv6 is not none) -%}
+  ipv6 address {{ i.dhcp_fwd_vrf_ipv6 }}
+  {% endif -%}
+ !
+ {% else -%}
+ ip address {{ i.ip_addr_v4_w_mask }}
+ {% endif -%}
+{% if (i.sys_int_state is defined) and (i.sys_int_state is not none) -%}
+ {{ i.sys_int_state }}
+ {% endif -%}
+!
+{% endfor -%}
+{% endfor -%}
+{#
+ #################
+ # CRAFT INTERFACE
+ #################
+-#}
+{% for craft in craft_info -%}
+interface craft {{ craft }}
+ {% set attrb1 = craft_info[craft] -%}
+ {% for i in attrb1 -%}
+ {% if (i.desc is defined) and (i.desc is not none) -%}
+ description "{{ i.desc }}"
+ {% endif -%}
+ {% if (i.ipv4_acl is defined) and (i.ipv4_acl is not none) -%}
+ access-group ipv4-acl {{ i.ipv4_acl }}
+ {% endif -%}
+ {% if i.cosq is not none -%}
+ cosq      {{ i.cosq }}
+ {% endif -%}
+ ip dhcp server {{ i.dhcp_state }}
+ {% if (i.vrf_name is defined) and (i.vrf_name is not none) -%}
+  ip vrf forwarding {{ i.vrf_name|upper }}
+  ip address {{ i.ip_addr_v4_w_mask }}
+  ipv6 address {{ i.ip_addr_v6_w_mask }}
+ {% else -%}
+ ip address {{ i.ip_addr_v4_w_mask }}
+ {% endif -%}
+ !
+ {{ i.shutdown_state }}
+!
+{% endfor -%}
+{% endfor -%}
+
+
+{#
+ #################
+ # CONTROL-PLANE
+ #################
+-#}
+{% for cntrl_elem in cntrl_plane -%}
+{% if (cntrl_elem.proto_acl is defined) and (cntrl_elem.proto_acl is not none) -%}
+control-plane {{ cntrl_elem.type }} {{ cntrl_elem.proto_acl }} {{ cntrl_elem.filter_name }}
+{% else -%}
+control-plane {{ cntrl_elem.type }} {{ cntrl_elem.filter_name }}
+{% endif -%}
+{% endfor -%}
+!
+
+
+{#
+ #################
+ # REDISTRIBUTION
+ #################
+-#}
+{% for rm in redist-%}
+{% set attr0 = redist[rm] -%}
+{% for i in attr0 -%}
+{% if (i.name is defined) and (i.name is not none) -%}
+redist-map {{ i.name }} {{ i.name_no }}
+ {% if (i.match_prefix is defined) and (i.match_prefix is not none) -%}
+ match prefix-list {{ i.match_prefix }}
+ {% endif -%}
+ {% if (i.match_prefix_v4 is defined) and (i.match_prefix_v4 is not none) -%}
+ match prefix-list ipv4 {{ i.match_prefix_v4 }}
+ {% endif -%}
+ {% if (i.match_prefix_v6 is defined) and (i.match_prefix_v6 is not none) -%}
+ match prefix-list ipv6 {{ i.match_prefix_v6 }}
+ {% endif -%}
+ {% endif -%}
+{% endfor -%}
+!
+{% endfor -%}
+
+
+{#
+ #################
+ # IP VRF w/BGP
+ #################
+-#}
+{% for vrf in ip_vrf -%}
+{% set attrb0 = ip_vrf[vrf] -%}
+ip vrf {{ vrf }}
+ {% for i in attrb0 -%}
+ {% if (i.description is defined) and (i.description is not none) -%}
+ description "{{ i.description }}"
+ {% endif -%}
+ {% if (i.ip_route_det is defined) and (i.ip_route_det is not none) -%}
+ ip route {{ i.ip_route_det }}
+ {% endif -%}
+ {% if (i.ipv6_route_det is defined) and (i.ipv6_route_det is not none) -%}
+ ipv6 route {{ i.ipv6_route_det }}
+ {% endif -%}
+ {% if (i.router_bgp is defined) and (i.router_bgp is not none) -%}
+ router bgp {{ i.router_bgp }}
+  {% endif -%}
+  {% if (i.redist_map is defined) and (i.redist_map is not none) -%}
+  redistribute connected redist-map {{ i.redist_map }}
+  {% endif -%}
+  {% if (i.rtr_id is defined) and (i.rtr_id is not none) -%}
+  router-id {{ i.rtr_id }}
+  {% endif -%}
+  {% if (i.graceful_restart_enable is defined) and (i.graceful_restart_enable is not none) -%}
+  graceful-restart          {{ i.graceful_restart_enable }}
+  {% endif -%}
+  {% if (i.graceful_restart_stalepath_time is defined) and (i.graceful_restart_stalepath_time is not none) -%}
+  graceful-restart stalepath-time {{ i.graceful_restart_stalepath_time }}
+  {% endif -%}
+  {% if (i.graceful_restart_path_selection_defer_time is defined) and (i.graceful_restart_path_selection_defer_time is not none) -%}
+  graceful-restart path-selection-defer-time {{ i.graceful_restart_path_selection_defer_time }}
+  {% endif -%}
+  {% if (i.maximum_paths_ebgp is defined) and (i.maximum_paths_ebgp is not none) -%}
+  maximum-paths ebgp {{ i.maximum_paths_ebgp }}
+  {% endif -%}
+  {% if (i.bgp_policy_map is defined) and (i.bgp_policy_map is not none) -%}
+  bgp-policy-map {{ i.bgp_policy_map }}
+   {% endif -%}
+   {% if (i.bgp_rule is defined) and (i.bgp_rule is not none) -%}
+   rule {{ i.bgp_rule }}
+    {% endif -%}
+    {% if (i.bgp_address_family is defined) and (i.bgp_address_family is not none) -%}
+    address-family {{ i.bgp_address_family }}
+    {% endif -%}
+    {% if (i.bgp_address_family_prefix_list is defined) and (i.bgp_address_family_prefix_list is not none) -%}
+     match prefix-list {{ i.bgp_address_family_prefix_list }}
+    {% endif -%}
+    {% if (i.bgp_address_family_community_list is defined) and (i.bgp_address_family_community_list is not none) -%}
+     set community-list {{ i.bgp_address_family_community_list }}
+    {% endif -%}
+    {% if (i.bgp_address_family_action is defined) and (i.bgp_address_family_action is not none) -%}
+     {{ i.bgp_address_family_action }}
+    {% endif -%}
+    !
+   {% if i.bgp_rule == 10 -%}
+   !
+   {% endif -%}
+  {% if (i.bgp_neighbor_ipaddr is defined) and (i.bgp_neighbor_ipaddr is not none) -%}
+  neighbor {{ i.bgp_neighbor_ipaddr }}
+   {% if (i.bgp_neighbor_remote_as is defined) and (i.bgp_neighbor_remote_as is not none) -%}
+   remote-as            {{ i.bgp_neighbor_remote_as }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_weight is defined) and (i.bgp_neighbor_weight is not none) -%}
+   weight               {{ i.bgp_neighbor_weight }}
+   {% endif -%}
+   {% if (i.soft_reconfiguration is defined) and (i.soft_reconfiguration is not none) -%}
+   {{ i.soft_reconfiguration }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_update_source is defined) and (i.bgp_neighbor_update_source is not none) -%}
+   update-source        {{ i.bgp_neighbor_update_source }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_bfd is defined) and (i.bgp_neighbor_bfd is not none) -%}
+   bfd                  {{ i.bgp_neighbor_bfd }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_details_ipv4_1 is defined) and (i.bgp_neighbor_addr_family_details_ipv4_1 is not none) -%}
+   address-family {{ i.bgp_neighbor_addr_family_details_ipv4_1 }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_state_ipv4_1 is defined) and (i.bgp_neighbor_addr_family_state_ipv4_1 is not none) -%}
+    {{ i.bgp_neighbor_addr_family_state_ipv4_1 }}
+   !
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_details_ipv4_2 is defined) and (i.bgp_neighbor_addr_family_details_ipv4_2 is not none) -%}
+   address-family {{ i.bgp_neighbor_addr_family_details_ipv4_2 }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_state_ipv4_2 is defined) and (i.bgp_neighbor_addr_family_state_ipv4_2 is not none) -%}
+     {{ i.bgp_neighbor_addr_family_state_ipv4_2 }}
+   !
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_details_ipv4_3 is defined) and (i.bgp_neighbor_addr_family_details_ipv4_3 is not none) -%}
+   address-family {{ i.bgp_neighbor_addr_family_details_ipv4_3 }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_state_ipv4_3 is defined) and (i.bgp_neighbor_addr_family_state_ipv4_3 is not none) -%}
+     {{ i.bgp_neighbor_addr_family_state_ipv4_3 }}
+   !
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_details_ipv6_1 is defined) and (i.bgp_neighbor_addr_family_details_ipv6_1 is not none) -%}
+   address-family {{ i.bgp_neighbor_addr_family_details_ipv6_1 }}
+    {% endif -%}
+    {% if (i.bgp_neighbor_addr_family_state_ipv6_1 is defined) and (i.bgp_neighbor_addr_family_state_ipv6_1 is not none) -%}
+     {{ i.bgp_neighbor_addr_family_state_ipv6_1 }}
+   !
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_details_ipv6_2 is defined) and (i.bgp_neighbor_addr_family_details_ipv6_2 is not none) -%}
+   address-family {{ i.bgp_neighbor_addr_family_details_ipv6_2 }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_state_ipv6_2 is defined) and (i.bgp_neighbor_addr_family_state_ipv6_2 is not none) -%}
+     {{ i.bgp_neighbor_addr_family_state_ipv6_2 }}
+   !
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_details_ipv6_3 is defined) and (i.bgp_neighbor_addr_family_details_ipv6_3 is not none) -%}
+   address-family {{ i.bgp_neighbor_addr_family_details_ipv6_3 }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_state_ipv6_3 is defined) and (i.bgp_neighbor_addr_family_state_ipv6_3 is not none) -%}
+     {{ i.bgp_neighbor_addr_family_state_ipv6_3 }}
+   !
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_details_misc is defined) and (i.bgp_neighbor_addr_family_details_misc is not none) -%}
+   address-family {{ i.bgp_neighbor_addr_family_details_misc }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_addr_family_state_misc is defined) and (i.bgp_neighbor_addr_family_state_misc is not none) -%}
+     {{ i.bgp_neighbor_addr_family_state_misc }}
+   !
+   {% endif -%}
+   {% endif -%}
+   {% if (i.bgp_neighbor_passwd is defined) and (i.bgp_neighbor_passwd is not none) -%}
+   password             {{ i.bgp_neighbor_passwd }}
+   {% endif -%}
+   {% if (i.bgp_neighbor_policy_map_in is defined) and (i.bgp_neighbor_policy_map_in is not none) -%}
+   bgp-policy-map {{ i.bgp_neighbor_policy_map_in }} in
+   {% endif -%}
+   {% if (i.bgp_neighbor_policy_map_out is defined) and (i.bgp_neighbor_policy_map_out is not none) -%}
+   bgp-policy-map {{ i.bgp_neighbor_policy_map_out }} out
+   {% endif -%}
+   {% if (i.bgp_neighbor_gnmi_group is defined) and (i.bgp_neighbor_gnmi_group is not none) -%}
+   gnmi-sensor-group    {{ i.bgp_neighbor_gnmi_group }}
+   !
+   {% endif -%}
+{% endfor -%}
+  !
+ !
+!
+{% endfor -%}
+
+
+{#
+ #################
+ # LOOPBACK INT
+ #################
+-#}
+{% for lo in int_lo -%}
+interface loopback {{ lo }}
+{%- set attr0 = int_lo[lo] %}
+{%- for i in attr0 %}
+ {% if (i.ip_vrf_fwd is defined) and (i.ip_vrf_fwd is not none) -%}
+ ip vrf forwarding {{ i.ip_vrf_fwd }}
+ {% endif -%}
+ ip address {{ i.ip_addr_v4_w_mask }}
+ {% if (i.ip_addr_v6_w_mask is defined) and (i.ip_addr_v6_w_mask is not none) -%}
+ ipv6 address {{ i.ip_addr_v6_w_mask }}
+ {% endif -%}
+ !
+ {{ i.lo_state }}
+{% endfor -%}
+!
+{% endfor -%}
+
+
+{#
+ #################
+ # ROUTER w/BGP
+ #################
+-#}
+{% for bgp in router_bgp -%}
+{% set attrb = router_bgp[bgp] -%}
+router bgp {{ bgp }}
+ {% for i in attrb -%}
+ {% if (i.redist_map is defined) and (i.redist_map is not none) -%}
+ redistribute connected redist-map {{ i.redist_map }}
+ {% endif -%}
+ {% if (i.redist_map_static is defined) and (i.redist_map_static is not none) -%}
+ redistribute static redist-map {{ i.redist_map_static }}
+ {% endif -%}
+ {% if (i.graceful_restart_enable is defined) and (i.graceful_restart_enable is not none) -%}
+ graceful-restart          {{ i.graceful_restart_enable }}
+ {% endif -%}
+ {% if (i.graceful_restart_stalepath_time is defined) and (i.graceful_restart_stalepath_time is not none) -%}
+ graceful-restart stalepath-time {{ i.graceful_restart_stalepath_time }}
+ {% endif -%}
+ {% if (i.graceful_restart_path_selection_defer_time is defined) and (i.graceful_restart_path_selection_defer_time is not none) -%}
+ graceful-restart path-selection-defer-time {{ i.graceful_restart_path_selection_defer_time }}
+ {% endif -%}
+ {% if (i.maximum_paths_ebgp is defined) and (i.maximum_paths_ebgp is not none) -%}
+ maximum-paths ebgp {{ i.maximum_paths_ebgp }}
+ {% endif -%}
+ {% if (i.bgp_policy_map is defined) and (i.bgp_policy_map is not none) -%}
+ bgp-policy-map {{ i.bgp_policy_map }}
+ {% endif -%}
+  {% if (i.bgp_rule is defined) and (i.bgp_rule is not none) -%}
+  rule {{ i.bgp_rule }}
+   {% if (i.bgp_addr_family is defined) and (i.bgp_addr_family is not none) -%}
+   address-family {{ i.bgp_addr_family }}
+     {% endif -%}
+     {% if (i.bgp_addr_action is defined) and (i.bgp_addr_action is not none) -%}
+     {{ i.bgp_addr_action }}
+     {% endif -%}
+    {% if (i.bgp_addr_prefix_list is defined) and (i.bgp_addr_prefix_list is not none) -%}
+    match prefix-list {{ i.bgp_addr_prefix_list }}
+    {% endif -%}
+    {% if (i.bgp_addr_comm_list is defined) and (i.bgp_addr_comm_list is not none) -%}
+    match community-list {{ i.bgp_addr_comm_list }}
+    !
+    {% endif -%}
+    {% if (i.bgp_addr_set_local_pref is defined) and (i.bgp_addr_set_local_pref is not none) -%}
+    set local-preference {{ i.bgp_addr_set_local_pref }}
+    {% endif -%}
+    {% if (i.bgp_addr_comm_list_set is defined) and (i.bgp_addr_comm_list_set is not none) -%}
+    set community-list {{ i.bgp_addr_comm_list_set }}
+    !
+    {% endif -%}
+    {% if (i.bgp_addr_set_next_hop is defined) and (i.bgp_addr_set_next_hop is not none) -%}
+    set next-hop     {{ i.bgp_addr_set_next_hop }}
+    {% endif -%}
+   !
+  !
+ {% if i.bgp_rule == 10 -%}
+ !
+ {% endif -%}
+ {% endif -%}
+ {% if (i.bgp_neighbor_ipaddr is defined) and (i.bgp_neighbor_ipaddr is not none) -%}
+ neighbor {{ i.bgp_neighbor_ipaddr }}
+  {% if (i.bgp_neighbor_remote_as is defined) and (i.bgp_neighbor_remote_as is not none) -%}
+  remote-as            {{ i.bgp_neighbor_remote_as }}
+  {% endif -%}
+  {% if (i.bgp_neighbor_weight is defined) and (i.bgp_neighbor_weight is not none) -%}
+  weight               {{ i.bgp_neighbor_weight }}
+  {% endif -%}
+  {% if (i.soft_reconfiguration is defined) and (i.soft_reconfiguration is not none) -%}
+  {{ i.soft_reconfiguration }}
+  {% endif -%}
+  {% if (i.bgp_neighbor_update_source is defined) and (i.bgp_neighbor_update_source is not none) -%}
+  update-source        {{ i.bgp_neighbor_update_source }}
+  {% endif -%}
+  {% if (i.bgp_neighbor_bfd is defined) and (i.bgp_neighbor_bfd is not none) -%}
+  bfd                  {{ i.bgp_neighbor_bfd }}
+  {% endif -%}
+  {% if (i.bgp_neighbor_addr_family_details_ipv4_1 is defined) and (i.bgp_neighbor_addr_family_details_ipv4_1 is not none) -%}
+  address-family {{ i.bgp_neighbor_addr_family_details_ipv4_1 }}
+  {% endif -%}
+    {% if (i.bgp_neighbor_addr_family_state_ipv4_1 is defined) and (i.bgp_neighbor_addr_family_state_ipv4_1 is not none) -%}
+    {{ i.bgp_neighbor_addr_family_state_ipv4_1 }}
+  !
+  {% endif -%}
+  {% if (i.bgp_neighbor_addr_family_details_ipv4_2 is defined) and (i.bgp_neighbor_addr_family_details_ipv4_2 is not none) -%}
+  address-family {{ i.bgp_neighbor_addr_family_details_ipv4_2 }}
+  {% endif -%}
+    {% if (i.bgp_neighbor_addr_family_state_ipv4_2 is defined) and (i.bgp_neighbor_addr_family_state_ipv4_2 is not none) -%}
+    {{ i.bgp_neighbor_addr_family_state_ipv4_2 }}
+  !
+  {% endif -%}
+  {% if (i.bgp_neighbor_addr_family_details_ipv4_3 is defined) and (i.bgp_neighbor_addr_family_details_ipv4_3 is not none) -%}
+  address-family {{ i.bgp_neighbor_addr_family_details_ipv4_3 }}
+  {% endif -%}
+    {% if (i.bgp_neighbor_addr_family_state_ipv4_3 is defined) and (i.bgp_neighbor_addr_family_state_ipv4_3 is not none) -%}
+    {{ i.bgp_neighbor_addr_family_state_ipv4_3 }}
+  !
+  {% endif -%}
+  {% if (i.bgp_neighbor_addr_family_details_ipv6_1 is defined) and (i.bgp_neighbor_addr_family_details_ipv6_1 is not none) -%}
+  address-family {{ i.bgp_neighbor_addr_family_details_ipv6_1 }}
+  {% endif -%}
+    {% if (i.bgp_neighbor_addr_family_state_ipv6_1 is defined) and (i.bgp_neighbor_addr_family_state_ipv6_1 is not none) -%}
+    {{ i.bgp_neighbor_addr_family_state_ipv6_1 }}
+  !
+  {% endif -%}
+  {% if (i.bgp_neighbor_addr_family_details_ipv6_2 is defined) and (i.bgp_neighbor_addr_family_details_ipv6_2 is not none) -%}
+  address-family {{ i.bgp_neighbor_addr_family_details_ipv6_2 }}
+  {% endif -%}
+    {% if (i.bgp_neighbor_addr_family_state_ipv6_2 is defined) and (i.bgp_neighbor_addr_family_state_ipv6_2 is not none) -%}
+    {{ i.bgp_neighbor_addr_family_state_ipv6_2 }}
+  !
+  {% endif -%}
+  {% if (i.bgp_neighbor_addr_family_details_ipv6_3 is defined) and (i.bgp_neighbor_addr_family_details_ipv6_3 is not none) -%}
+  address-family {{ i.bgp_neighbor_addr_family_details_ipv6_3 }}
+  {% endif -%}
+    {% if (i.bgp_neighbor_addr_family_state_ipv6_3 is defined) and (i.bgp_neighbor_addr_family_state_ipv6_3 is not none) -%}
+    {{ i.bgp_neighbor_addr_family_state_ipv6_3 }}
+  !
+  {% endif -%}
+  {% if (i.bgp_neighbor_addr_family_details_ipv6_4 is defined) and (i.bgp_neighbor_addr_family_details_ipv6_4 is not none) -%}
+  address-family {{ i.bgp_neighbor_addr_family_details_ipv6_4 }}
+  {% endif -%}
+    {% if (i.bgp_neighbor_addr_family_state_ipv6_4 is defined) and (i.bgp_neighbor_addr_family_state_ipv6_4 is not none) -%}
+    {{ i.bgp_neighbor_addr_family_state_ipv6_4 }}
+  !
+  {% endif -%}
+  {% if (i.bgp_neighbor_addr_family_details_misc is defined) and (i.bgp_neighbor_addr_family_details_misc is not none) -%}
+  address-family {{ i.bgp_neighbor_addr_family_details_misc }}
+    {% if (i.bgp_neighbor_addr_family_state_misc is defined) and (i.bgp_neighbor_addr_family_state_misc is not none) -%}
+    {{ i.bgp_neighbor_addr_family_state_misc }}
+  !
+  {% else -%}
+  !
+  {% endif -%}
+  {% endif -%}
+  {% if (i.bgp_neighbor_passwd is defined) and (i.bgp_neighbor_passwd is not none) -%}
+  password             {{ i.bgp_neighbor_passwd }}
+  {% endif -%}
+  {% if (i.bgp_neighbor_policy_map_in is defined) and (i.bgp_neighbor_policy_map_in is not none) -%}
+  bgp-policy-map {{ i.bgp_neighbor_policy_map_in }} in
+  {% endif -%}
+  {% if (i.bgp_neighbor_policy_map_out is defined) and (i.bgp_neighbor_policy_map_out is not none) -%}
+  bgp-policy-map {{ i.bgp_neighbor_policy_map_out }} out
+  {% endif -%}
+  {% if (i.bgp_ebgp_multihop is defined) and (i.bgp_ebgp_multihop is not none) -%}
+  ebgp-multihop        {{ i.bgp_ebgp_multihop }}
+  {% endif -%}
+  {% if (i.bgp_neig_desc is defined) and (i.bgp_neig_desc is not none) -%}
+  description          "{{ i.bgp_neig_desc }}"
+  {% endif -%}
+  {% if (i.bgp_neighbor_gnmi_group is defined) and (i.bgp_neighbor_gnmi_group is not none) -%}
+  gnmi-sensor-group    {{ i.bgp_neighbor_gnmi_group }}
+  {% endif -%}
+ !
+ {% endif -%}
+{% endfor -%}
+{% if loop.last -%}
+!
+{% endif -%}
+{% endfor -%}
+!
+
+
+{#
+ ##############
+ # PIM CFG
+ ##############
+-#}
+{% for pm in pim -%}
+router pim {{ pm }}
+ {% set attrb0 = pim[pm] -%}
+ {% for i in attrb0 -%}
+ {% if (i.rp_addr is defined) and ( i.rp_addr is not none) and (i.group_addr_w_mask is defined) and (i.group_addr_w_mask is not none) -%}
+ rp-address {{ i.rp_addr }} group-address {{ i.group_addr_w_mask }}
+{% endif -%}
+{% endfor -%}
+!
+{% endfor -%}
+
+
+{#
+ #################
+ # VLANS - LAG/WAN
+ #################
+-#}
+{% for vid in vlan_def -%}
+{% set attb0 = vlan_def[vid] -%}
+vlan {{ vid }}
+ {% for i in attb0 -%}
+ {% if (i.vlan_mode is defined) and (i.vlan_mode is not none) -%}
+ mode {{ i.vlan_mode }}
+ {% endif -%}
+ {% if (i.description is defined) and (i.description is not none) -%}
+ description "{{ i.description }}"
+ {% endif -%}
+ {% if (i.l3_service is defined) and (i.l3_service is not none) -%}
+ l3-service  {{ i.l3_service }}
+ {% endif -%}
+ {% if (i.egress_flooding is defined) and (i.egress_flooding is not none) -%}
+ egress flooding {{ i.egress_flooding }}
+ {% endif -%}
+ {% if (i.l2_dhcp_profile is defined) and (i.l2_dhcp_profile is not none) -%}
+ l2-dhcp-profile {{ i.l2_dhcp_profile }}
+ {% endif -%}
+ {% if (i.source_verify is defined) and (i.source_verify is not none) -%}
+ source-verify   {{ i.source_verify }}
+ {% endif -%}
+ {% if (i.vlan_mff is defined) and (i.vlan_mff is not none) -%}
+ mff             {{ i.vlan_mff }}
+{% endif %}
+!
+{% endfor -%}
+{% endfor -%}
+
+
+{#
+ #################
+ # VLAN INTERFACE
+ #################
+-#}
+{% for vlan in int_vlan -%}
+interface vlan {{ vlan }}
+ {% set attr0 = int_vlan[vlan] -%}
+ {% for i in attr0 -%}
+ {% if (i.access_group_ipv4_acl is defined) and (i.access_group_ipv4_acl is not none) -%}
+ access-group ipv4-acl {{ i.access_group_ipv4_acl }}
+ {% endif -%}
+ {% if (i.access_group_ipv6_acl is defined) and (i.access_group_ipv6_acl is not none) -%}
+ access-group ipv6-acl {{ i.access_group_ipv6_acl }}
+ {% endif -%}
+ {% if (i.description is defined) and (i.description is not none) -%}
+ description "{{ i.description }}"
+ {% endif -%}
+ {% if (i.mtu is defined) and (i.mtu is not none) -%}
+ mtu         {{ i.mtu }}
+ {% endif -%}
+ {% if (i.proxy_arp is defined) and (i.proxy_arp is not none) -%}
+ arp proxy-arp {{ i.proxy_arp }}
+ {% endif -%}
+ {% if (i.ip_vrf_fwd is defined) and (i.ip_vrf_fwd is not none) -%}
+ ip vrf forwarding {{ i.ip_vrf_fwd }}
+ {% endif -%}
+ {% if (i.ipaddr_vrf_w_mask is defined) and (i.ipaddr_vrf_w_mask is not none) -%}
+  ip address {{ i.ipaddr_vrf_w_mask }}
+ !
+ {% endif -%}
+ {% if (i.ipaddr_v4_w_mask is defined) and (i.ipaddr_v4_w_mask is not none) -%}
+ ip address {{ i.ipaddr_v4_w_mask }}
+ {% endif -%}
+ {% if (i.ip_pim is defined) and (i.ip_pim is not none) -%}
+ ip pim {{ i.ip_pim }}
+ {% endif -%}
+ {% if (i.ipaddr_v6_w_mask is defined) and (i.ipaddr_v6_w_mask is not none) -%}
+ ipv6 address {{ i.ipaddr_v6_w_mask }}
+ {% endif -%}
+ {% if (i.ipv6_redirects is defined) and (i.ipv6_redirects is not none) -%}
+ ipv6 redirects {{ i.ipv6_redirects }} unreachables {{ i.ipv6_redirects }}
+ {% endif -%}
+ {% if (i.ipv6_link is defined) and (i.ipv6_link is not none) -%}
+ ipv6 {{ i.ipv6_link }} link-mtu {{ i.l3_link_mtu }}
+ {% endif -%}
+ {% if (i.vlan_state is defined) and (i.vlan_state is not none) -%}
+ {{ i.vlan_state }}
+{% endif -%}
+{% endfor -%}
+!
+{% endfor -%}
+
+
+{#
+ ###########################
+ # TRANSPORT-SERVICE-PROFILE
+ ###########################
+-#}
+{% for tsp in transport_service_profile -%}
+{% set attb = transport_service_profile[tsp] -%}
+transport-service-profile {{ tsp }}
+ {% for i in attb -%}
+ {% if (i.description is defined) and ( i.description is not none) -%}
+ description {{ i.description | upper }}
+ {% endif -%}
+ {% if (i.vlan_list is defined) and ( i.vlan_list is not none) -%}
+ vlan-list {{ i.vlan_list }}
+{% endif -%}
+!
+{% endfor -%}
+{% endfor -%}
+
+
+{#
+ ###########################
+ # LAG INTERFACE CONFIG
+ ###########################
+-#}
+{% for lag in int_lag %}
+interface lag {{ lag }}
+ {% set attr0 = int_lag[lag] -%}
+ {% for i in attr0 -%}
+ {% if (i.gnmi_sensor_group is defined) and ( i.gnmi_sensor_group is not none) -%}
+ gnmi-sensor-group         {{ i.gnmi_sensor_group }}
+ {% endif -%}
+ {% if (i.description is defined) and ( i.description is not none) -%}
+ description               "{{ i.description }}"
+ {% endif -%}
+ {% if (i.hash_method is defined) and ( i.hash_method is not none) -%}
+ hash-method               {{ i.hash_method }}
+ {% endif -%}
+ {% if (i.lacp_mode is defined) and ( i.lacp_mode is not none) -%}
+ lacp-mode                 {{ i.lacp_mode }}
+ {% endif -%}
+ {% if (i.lacp_actor_key is defined) and ( i.lacp_actor_key is not none) -%}
+ lacp-actor-key            {{ i.lacp_actor_key }}
+ {% endif -%}
+ {% if (i.max_port is defined) and ( i.max_port is not none) -%}
+ max-port                  {{ i.max_port }}
+ {% endif -%}
+ {% if (i.mtu is defined) and ( i.mtu is not none) -%}
+ mtu                       {{ i.mtu }}
+ {% endif -%}
+ {% if (i.role is defined) and ( i.role is not none) -%}
+ role                      {{ i.role }}
+ {% endif -%}
+ {% if (i.transport_service_profile is defined) and ( i.transport_service_profile is not none) -%}
+ transport-service-profile {{ i.transport_service_profile }}
+ {% endif -%}
+ {% if (i.transport_service is defined) and ( i.transport_service is not none) -%}
+ transport-service {{ i.transport_service }}
+ {% endif -%}
+ {%- if (i.vlan_monitor is defined) and ( i.vlan_monitor is not none) %} vlan-monitor      {{ i.vlan_monitor }}
+ {% endif -%}
+ {%- if (i.gnmi_sensor_group_vlan is defined) and (i.gnmi_sensor_group_vlan is not none) %} gnmi-sensor-group {{ i.gnmi_sensor_group_vlan }}
+ !
+ {% endif -%}
+ {% if (i.shelf_slot is defined) and (i.shelf_slot is not none) -%}
+ shelf-slot            {{ i.shelf_slot }}
+ {% endif -%}
+ {% if (i.lag_state is defined) and ( i.lag_state is not none) -%}
+ {{ i.lag_state }}
+ {% endif -%}
+ {%- endfor %}
+!
+{%- endfor %}
+
+
+{#
+ ###########################
+ # ETH INTERFACE CONFIG
+ ###########################
+-#}
+{% for eth in int_eth %}
+interface ethernet {{ eth }}
+ {% set attr0 = int_eth[eth] -%}
+ {% for i in attr0 -%}
+ {% if (i.alarm_suppression is defined) and (i.alarm_suppression is not none) -%}
+ alarm-suppression {{ i.alarm_suppression }}
+ {% endif -%}
+ {% if (i.arp_announce is defined) and (i.arp_announce is not none) -%}
+ arp arp-announce {{ i.arp_announce }}
+ {% endif -%}
+ {% if (i.arp_ignore is defined) and (i.arp_ignore is not none) -%}
+ arp arp-ignore {{ i.arp_ignore }}
+ {% endif -%}
+ {% if (i.cosq is defined) and (i.cosq is not none) -%}
+ cosq              {{ i.cosq }}
+ {% endif -%}
+ {% if (i.description is defined) and (i.description is not none) -%}
+ description       "{{ i.description }}"
+ {% endif -%}
+ {% if (i.fec is defined) and ( i.fec is not none) -%}
+ fec               {{ i.fec}}
+ {% endif -%}
+ {% if (i.gnmi_sensor is defined) and (i.gnmi_sensor is not none) -%}
+ gnmi-sensor-group {{ i.gnmi_sensor }}
+ {% endif -%}
+ {% if (i.ip_unicast_rpf is defined) and (i.ip_unicast_rpf is not none) -%}
+ ip-unicast-rpf {{ i.ip_unicast_rpf }}
+ {% endif -%}
+ {% if (i.lldp_admin_state is defined) and (i.lldp_admin_state is not none) -%}
+ lldp admin-state {{ lldp_admin_state }}
+ {% endif -%}
+ {% if (i.lldp_profile is defined) and (i.lldp_profile is not none) -%}
+ lldp profile LLDP-CORE
+ {% endif -%}
+ {% if (i.eth_state is defined) and (i.eth_state is not none) -%}
+ {{ i.eth_state }}
+ {% endif -%}
+ {% if (i.switch_port is defined) and (i.switch_port is not none) -%}
+ switchport  {{ i.switch_port }}
+ {% endif -%}
+ {% if (i.prot_group is defined) and (i.prot_group is not none) -%}
+ protection-group  {{ i.prot_group }}
+ {% endif -%}
+ {% if (i.role is defined) and ( i.role is not none) -%}
+ role              {{ i.role }}
+ {% endif -%}
+ {% if (i.transport_service_profile is defined) and (i.transport_service_profile is not none) -%}
+ transport-service-profile              {{ i.transport_service_profile }}
+ {% endif -%}
+ {% if (i.sys_lag_name is defined) and (i.sys_lag_name is not none) -%}
+ system-lag        {{ i.sys_lag_name }}
+ {% endif -%}
+ {% if (i.slot_lag is defined) and (i.slot_lag is not none) -%}
+ slot-lag        {{ i.slot_lag }}
+{% endif -%}
+{% endfor -%}
+!
+{% endfor -%}
+
+
+{#
+ ###########################
+ # GRADE OF SERVICE CONFIG
+ ###########################
+-#}
+grade-of-service
+{% for gos in grade_of_service -%}
+{{ gos }}
+{% if loop.last -%}
+!
+{% endif -%}
+{% endfor-%}
+!
+!
+
+
+{#
+ ###########################
+ # RG-MGMT-PROFILE CONFIG
+ ###########################
+-#}
+{% for rg in rg_profile -%}
+rg-mgmt-profile {{ rg }}
+ {% set att0 = rg_profile[rg] -%}
+ {% for i in att0 -%}
+ {% if (i.acs_url is defined) and (i.acs_url is not none) -%}
+ acs-url {{ i.acs_url }}
+ {% endif -%}
+ {% if (i.sys_username is defined) and (i.sys_username is not none) -%}
+ username {{ i.sys_username }}
+ {% endif -%}
+ {% if (i.sys_password is defined) and (i.sys_password is not none) -%}
+ password {{ i.sys_password }}
+ {% endif -%}
+!
+{% endfor -%}
+{% endfor -%}
+
+
+
+{#
+ #############
+ # CLASS-MAPS
+ #############
+-#}
+{% for fn in class_map -%}
+class-map {{ fn }}
+ {% set elem = class_map[fn] -%}
+ {% for i in elem -%}
+ {% if (i.rl_state is defined) and (i.rl_state is not none) -%}
+ resource-level {{ i.rl_state }}
+ {% else -%}
+ {% endif -%}
+ {% if (i.direction is defined) and not none -%}
+ {{ i.direction }}-flow {{ i.flow_number }}
+ {% else -%}
+ {% if (i.flow_number is defined) and not none -%}
+ flow {{ i.flow_number }}
+ {% endif -%}
+ {% endif -%}
+  {% if (i.fn_desc is defined) and (i.fn_desc is not none) -%}
+  description "{{ i.fn_desc }}"
+  {% endif -%}
+  {% for x in i.rule -%}
+  rule {{ x.number }} match {{ x.match_detail }}
+  {% if loop.last -%}
+ !
+ {% endif -%}
+ {% endfor -%}
+ {%- endfor -%}
+!
+{% endfor -%}
+
+
+{#
+ ################
+ # POLICY-MAP CFG
+ ################
+-#}
+{%  for pm in policy_map -%}
+{% set attb = policy_map[pm] -%}
+policy-map {{ pm }}
+ {% for i in attb -%}
+ {% if (i.policy_actions is defined) and ( i.policy_actions is not none) -%}
+ policy-actions {{ i.policy_actions }}
+ {% endif -%}
+ {% if (i.class_map_ether is defined) and ( i.class_map_ether is not none) -%}
+ class-map-ethernet {{ i.class_map_ether }}
+  flow {{ i.class_map_ether_flow }}
+  !
+ {% endif -%}
+ {% if (i.class_map_ip is defined) and ( i.class_map_ip is not none) -%}
+ class-map-ip {{ i.class_map_ip }}
+  {% endif -%}
+  {% if (i.traffic_class is defined) and ( i.traffic_class is not none) -%}
+  traffic-class {{ i.traffic_class }}
+   {% if (i.egress_shaper is defined) and ( i.egress_shaper == "yes" ) -%}
+   {% if (i.es_max is defined) and ( i.es_max is not none) -%}
+   egress-shaper maximum {{ i.es_max }}
+   {% endif -%}
+   {% if (i.es_min is defined) and ( i.es_min is not none) -%}
+   egress-shaper minimum {{ i.es_min }}
+   {% endif -%}
+   {% if (i.es_depth is defined) and ( i.es_depth is not none) -%}
+   egress-shaper queue-depth {{ i.es_depth }}
+   {% endif -%}
+   {% if (i.es_policy is defined) and ( i.es_policy is not none) -%}
+   egress-shaper discard-policy {{ i.es_policy }}
+  {% endif -%}
+  !
+  {% else -%}
+  !
+  {% endif -%}
+  {% endif -%}
+  {% if (i.egress_flow_no is defined) and (i.egress_flow_no is not none) -%}
+  egress-flow {{ i.egress_flow_no }}
+   {% if (i.traffic_class_sub is defined) and ( i.traffic_class_sub is not none) -%}
+   traffic-class {{ i.traffic_class_sub }}
+   {% endif -%}
+   {% if (i.eg_account is defined) and (i.eg_account is not none) -%}
+   {{ i.eg_account }}
+   {% endif -%}
+   {% if (i.egress_meter_cir is defined) and (i.egress_meter_cir is not none) -%}
+   egress-meter cir {{ i.egress_meter_cir }}
+   {% endif -%}
+   {% if (i.egress_meter_eir is defined) and (i.egress_meter_eir is not none) -%}
+   egress-meter eir {{ i.egress_meter_eir }}
+   {%  endif -%}
+   {% if (i.egress_action is defined) and (i.egress_action is not none) -%}
+   {{ i.egress_action }}
+  {% endif -%}
+  !
+  {% endif -%}
+  {% if (i.ingress_flow_no is defined) and (i.ingress_flow_no is not none) -%}
+  ingress-flow {{ i.ingress_flow_no }}
+   {% if (i.ig_account is defined) and (i.ig_account is not none) -%}
+   {{ i.ig_account }}
+   {% endif -%}
+   {% if (i.ingress_meter_cir is defined) and (i.ingress_meter_cir is not none) -%}
+   ingress-meter cir {{ i.ingress_meter_cir }}
+   {% endif -%}
+   {% if (i.ingress_meter_eir is defined) and (i.ingress_meter_eir is not none) -%}
+   ingress-meter eir {{ i.ingress_meter_eir }}
+   {%  endif  -%}
+   {% if (i.ingress_meter_cbs is defined) and (i.ingress_meter_cbs is not none) -%}
+   ingress-meter cbs-bytes {{ i.ingress_meter_cbs }}
+   {% endif -%}
+   {% if (i.ingress_meter_ebs is defined) and (i.ingress_meter_ebs is not none) -%}
+   ingress-meter ebs-bytes {{ i.ingress_meter_ebs }}
+   {% endif -%}
+   {% if (i.ingress_action is defined) and (i.ingress_action is not none) -%}
+   {{ i.ingress_action }}
+  {% endif -%}
+  !
+  {% endif -%}
+  {% if (i.egress is defined) and (i.egress == "shaper") -%}
+  egress {{ i.egress }}
+   {% if (i.scheduling_type is defined) and ( i.scheduling_type is not none) -%}
+   scheduling-type {{ i.scheduling_type }}
+   {% endif -%}
+   {% if (i.egress_bw is defined) and ( i.egress_bw is not none) -%}
+   bw {{ i.egress_bw }}
+   {% endif -%}
+    {% if (i.ebm_parent_cos is defined) and ( i.ebm_parent_cos is not none) -%}
+    max-parent-cos {{ i.ebm_parent_cos }}
+    {% endif -%}
+    {% if (i.ebm_parent_cos_min is defined) and ( i.ebm_parent_cos_min is not none) -%}
+    min-parent-cos {{ i.ebm_parent_cos_min }}
+    {% endif -%}
+    {% if (i.ebm_parent_max is defined) and ( i.ebm_parent_max is not none) -%}
+    maximum        {{ i.ebm_parent_max }}
+    {% endif -%}
+    {% if (i.ebm_parent_min is defined) and ( i.ebm_parent_min is not none) -%}
+    minimum        {{ i.ebm_parent_min }}
+   {% endif -%}
+   {%  if (i.eb_min is defined) and ( i.eb_min is not none) -%}
+   bw {{ i.eb_min }}
+   {% endif -%}
+    {% if (i.eb_min_max_parent_cos is defined) and ( i.eb_min_max_parent_cos is not none) -%}
+    max-parent-cos {{ i.eb_min_max_parent_cos }}
+    {% endif -%}
+    {% if (i.eb_min_parent_cos is defined) and ( i.eb_min_parent_cos is not none) -%}
+    min-parent-cos {{ i.eb_min_parent_cos }}
+    {% endif -%}
+    {% if (i.eb_min_parent_max is defined) and ( i.eb_min_parent_max is not none) -%}
+    maximum {{ i.eb_min_parent_max }}
+    {% endif -%}
+    {% if (i.eb_min_parent_min is defined) and ( i.eb_min_parent_min is not none) -%}
+    minimum         {{ i.eb_min_parent_min }}
+   {% endif -%}
+    {% if (i.eb_min_parent_weight is defined) and ( i.eb_min_parent_weight is not none) -%}
+    weight {{ i.eb_min_parent_weight }}
+   {% endif -%}
+  !
+  {% endif -%}
+  {% if (i.ingress_misc is defined) and (i.ingress_misc is not none) -%}
+  ingress {{ i.ingress_misc }}
+   {% if (i.ingress_misc_eir is defined) and ( i.ingress_misc_eir is not none) -%}
+   eir       {{ i.ingress_misc_eir }}
+  {% endif -%}
+  !
+  {% endif -%}
+  {% if (i.egress_aggregate_shaper is defined) and (i.egress_aggregate_shaper is not none) -%}
+  egress-aggregate-shaper {{ i.egress_aggregate_shaper }}
+ {% endif -%}
+ {% if loop.last -%}
+ !
+{% endif -%}
+{%  endfor -%}
+!
+{% endfor -%}
+
+
+{#
+ ################
+ # MULTIBIND INT
+ ################
+-#}
+{% for mb in int_mb -%}
+interface multibind {{ mb }}
+{%- set attr0 = int_mb[mb] %}
+{%- for i in attr0 %}
+ {% if (i.ip_addr_v4_w_mask is defined) and (i.ip_addr_v4_w_mask is not none) -%}
+ ip address {{ i.ip_addr_v4_w_mask }}
+ {% endif -%}
+ {% if (i.ip_addr_v6_w_mask is defined) and (i.ip_addr_v6_w_mask is not none) -%}
+ ipv6 address {{ i.ip_addr_v6_w_mask }}
+ {% endif -%}
+ {% if (i.proxy_arp is defined) and (i.proxy_arp is not none) -%}
+ arp proxy-arp {{ i.proxy_arp }}
+ {% endif -%}
+ {% if (i.ip_vrf is defined) and (i.ip_vrf is not none) -%}
+ ip vrf forwarding {{ i.ip_vrf }}
+   ip address {{ i.ip_addr_v4_w_mask_vrf }}
+ !
+ {% endif -%}
+ {% if (i.ipv6_enabled is defined) and (i.ipv6_enabled is not none) -%}
+ ipv6 enabled {{ i.ipv6_enabled }}
+ {% endif -%}
+ {% if (i.description is defined) and (i.description is not none) -%}
+ description "{{ i.description }}"
+ {% endif -%}
+ {% if (i.mb_state is defined) and (i.mb_state is not none) -%}
+ {{ i.mb_state }}
+{% endif -%}
+{% endfor -%}
+{% if loop.cycle -%}
+!
+{% endif -%}
+{% endfor -%}
+{#
+ ################
+ # FIXED CFG
+ ################
+-#}
+id-profile id-prof-1
+circuit-id "%SystemId Eth %Shelf/%Slot/%Port/%OntPort:%CTag"
+remote-id %OntIfSID
+!
+l2-dhcp-profile l2-dhcp-prof-1
+id-name id-prof-1
+!
+{#
+ ################
+ # DHCP RELAY CFG
+ ################
+-#}
+{% for dv4r in dhcp_relay_server -%}
+dhcp-v4-relay-profile {{ dv4r }}
+ {% set attrb0 = dhcp_relay_server[dv4r] -%}
+ {% for i in attrb0 -%}
+ {% if (i.helper_no is defined) and (i.helper_addr is defined) and (i.helper_addr is not none) -%}
+ helper-address {{ i.helper_no }} {{ i.helper_addr }}
+ {% endif -%}
+ {% if (i.relay_addr is defined) and (i.relay_addr is not none) -%}
+ relay-agent-address {{ i.relay_addr }}
+ {% endif -%}
+ {% if (i.vrf is defined) and (i.vrf is not none) -%}
+ vrf {{ i.vrf }}
+ {% endif -%}
+ {% if (i.l2_dhcp_profile is defined) and (i.l2_dhcp_profile is not none) -%}
+ l2-dhcp-profile {{ i.l2_dhcp_profile }}
+{% endif -%}
+{% endfor -%}
+!
+{% endfor -%}
+
