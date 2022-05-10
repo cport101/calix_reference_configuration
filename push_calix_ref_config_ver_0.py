@@ -81,6 +81,9 @@ ipv4_ntp_servers:
   ntp2:
     - { ntp_srv_no: "2", ipv4_addr: ,
         ntp_fqdn: "sjclnx-st01.calix.local", source_int: "system-craft" }
+#############
+# AAA 
+#############
 aaa:
     # tacacs-if-up-else-local Authenticate via tacacs [only] if up, else local
     # tacacs-then-local       Authenticate using tacacs then local database
@@ -91,17 +94,27 @@ aaa:
     # FIXED AAA ROLES:
     # admin  calixsupport  networkadmin  oper  ro
     user:
-        - ['calixsupport','$1$qdmQFTMT$aaOZdqIzWwQsfSU5pc4XT0','calixsupport']
+        - ['calixsupport','$1$2GV.JGzm$wKm7TIsZZgQMlAgvMwnSe/','calixsupport']
         - ['monitor','$1$bo6RaxHE$prYA2waVd/o4atvb1H8l8/','oper']
         - ['networkadmin','$1$henWME92$LqNxDU3.wWG19Fz.AlL5H0','networkadmin']
         - ['support','$1$s4LUL/4m$aQjOzqPRi/CUHpaYTGLGz/','oper']
         - ['sysadmin','$1$.fwnoBuy$fmIOhTEfd3RGyOSiwaQA40','admin']
-ont_upg_srv:
-    ous:
-    - { source_int: "system-craft", ipaddr: "10.136.10.34",
-        username: "cafetest", passwd: '$1001$U2FsdGVkX1/K59XU+GRgqOOPgVk5Jfp0',
-        port: 21 }
+#############
+# LOGGING 
+#############
+logging:
+  host0:
+  - { lg_src_int: "system-craft", lg_host: "slc-scratch.caal.dev", lg_host_trans: , lg_host_port: , 
+      lg_host_level: , lg_host_facility: , lg_host_vrf:  }
+####################
+# ONT UPGRADE SERVER 
+####################
+ont_up_server:
+  10.136.10.34:
+    - { user_name: "cafetest",  user_passwd: "$1001$U2FsdGVkX1/K59XU+GRgqOOPgVk5Jfp0", 
+      user_port: 21, sys_craft: "system-craft", upgrade_vrf: }
 """
+
 ######################################################################
 # !!# basic settings [1]
 ######################################################################
@@ -117,6 +130,11 @@ basic_settings_jinja = """
 ip host {{ i.name_fqdn }} {{ i.ipv4_addr }}
 {% endfor -%}
 {% endfor -%}
+{#
+ #----------------
+ # TIME SERVER NTP
+ #---------------
+-#}
 {% for ts in ipv4_ntp_servers -%}
 {% set list_ts = ipv4_ntp_servers[ts] -%}
 {% for i in list_ts -%}
@@ -128,11 +146,75 @@ ntp source-interface {{ i.source_int }}
 {% endif -%}
 {% endfor -%}
 {% endfor -%}
+{#
+ #----------------
+ # AAA
+ #----------------
+-#}
 aaa authentication-order {{ aaa.auth_order }}
-aaa tacacs source-interface {{ aaa.source_interface }}
-aaa tacacs server {{ aaa.tac_srv_ipaddr }} secret  {{ aaa.tacacs_secret }}
 {% for login, passwd, role  in aaa.user -%}
 aaa user {{ login }} password {{ passwd }} role {{ role }}
+{% endfor -%}
+aaa tacacs source-interface {{ aaa.source_interface }}
+aaa tacacs server {{ aaa.tac_srv_ipaddr }} secret {{ aaa.tacacs_secret }}
+{#
+ #----------------
+ # LOGGING
+ #----------------
+-#}
+{% for lg in logging -%}
+{% set attr = logging[lg] -%}
+{% for i in attr -%}
+{% if (i.lg_src_int is defined) and (i.lg_src_int is not none) -%}
+logging source-interface {{ i.lg_src_int }}
+{% endif -%}
+{% if (i.lg_host is defined) and (i.lg_host is not none) -%}
+logging host {{ i.lg_host }}
+{% endif -%}
+{% if (i.lg_host_trans is defined) and (i.lg_host_trans is not none) -%}
+ transport    {{ i.lg_host_trans }}
+{% endif -%}
+{% if (i.lg_host_port is defined) and (i.lg_host_port is not none) -%}
+ port         {{ i.lg_host_port }}
+{% endif -%}
+{% if (i.lg_host_level is defined) and (i.lg_host_level is not none) -%}
+ log-level    {{ i.lg_host_level }}
+{% endif -%}
+{% if (i.lg_host_facility is defined) and (i.lg_host_facility is not none) -%}
+ log-facility {{ i.lg_host_facility }}
+{% endif -%}
+{% if (i.lg_host_vrf is defined) and (i.lg_host_vrf is not none) -%}
+ vrf          {{ i.lg_host_vrf }}
+{% endif -%}
+!
+{% endfor -%}
+{% endfor -%}
+{#
+ #-------------------
+ # ONT UPGRADE SERVER
+ #-------------------
+-#}
+{% for ont_s_ip in ont_up_server -%}
+ont-upgrade server {{ ont_s_ip }}
+{% set attrb0 = ont_up_server[ont_s_ip] -%}
+{% for i in attrb0 -%}
+ {% if ( i.user_name is defined) and ( i.user_name is not none) -%}
+ username {{ i.user_name }}
+ {% endif -%}
+ {% if ( i.user_passwd is defined) and ( i.user_passwd is not none) -%}
+ password {{ i.user_passwd }}
+ {% endif -%}
+ {% if ( i.user_port is defined) and ( i.user_port is not none) -%}
+ port {{ i.user_port }}
+{% endif -%}
+!
+{% if ( i.sys_craft is defined) and ( i.sys_craft is not none) -%}
+ont-upgrade source-interface {{ i.sys_craft }}
+{% endif -%}
+{% if ( i.upgrade_vrf is defined) and ( i.upgrade_vrf is not none) -%}
+ont-upgrade vrf {{ i.upgrade_vrf }}
+{% endif -%}
+{% endfor -%}
 {% endfor -%}
 """
 ######################################################################
